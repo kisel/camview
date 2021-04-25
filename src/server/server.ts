@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
-import { ListResponse, ListItem } from '../common/models';
+import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
 import tmp = require('tmp');
@@ -11,6 +11,12 @@ import { apiFileGenWrapper } from './tmpfileproc';
 
 const app = express();
 const router = express();
+
+router.get('/api/cameras/', apiWrapper<CamListResponse>(async req => {
+    return {
+        items: current_config.cameras
+    }
+}));
 
 router.get('/api/list/', apiWrapper<ListResponse>(async req => {
     const dirnames = await getSubdirNames(current_config.storage);
