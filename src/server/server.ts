@@ -3,10 +3,11 @@ import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
 import { ListResponse, ListItem } from '../common/models';
-import { apiError, apiWrapper } from './utils';
+import { apiError, apiWrapper, errorWrapper } from './utils';
 import { getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
 import tmp = require('tmp');
-import { convertToMp4 } from './ffmpeg';
+import { convertToMp4, getVideoThumbnail } from './ffmpeg';
+import { apiFileGenWrapper } from './tmpfileproc';
 
 const app = express();
 const router = express();
@@ -45,36 +46,33 @@ router.get('/api/list/:camname/:date/:hour', apiWrapper<ListResponse>(async req 
     }
 }));
 
-router.get('/api/list/:camname/:date/:hour/:basename.mp4', async (req, res) => {
+router.get('/api/list/:camname/:date/:hour/:basename.mp4', errorWrapper(async (req, res) => {
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
     const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
 
-    tmp.dir(async (err, tmppath, cleanupCallback) => {
-        if (err) {
-            apiError(res, err);
-        } else {
-            const tmpFile = path.join(tmppath, `${basefn}.mp4`);
-            const ffmpegError = await convertToMp4(tsfile, tmpFile).then(()=>null).catch((e)=>e);
-            if (ffmpegError != null) {
-                apiError(res, ffmpegError);
-            } else {
-                await new Promise<void>((resolve, _reject) => {
-                    res.sendFile(tmpFile, (err) => {
-                        if (err != null) {
-                            console.log(`Unexpected error while sending file ${tmpFile}`)
-                            res.end();
-                        }
-                        resolve();
-                    });
-                });
-            }
-            cleanupCallback();
-        }
-      });
-});
+    await apiFileGenWrapper(req, res, async (tmpDir)=> {
+        const tmpFile = path.join(tmpDir, `${basefn}.mp4`);
+        await convertToMp4(tsfile, tmpFile)
+        return tmpFile;
+    });
+}));
+
+router.get('/api/list/:camname/:date/:hour/:basename.jpg', errorWrapper(async (req, res) => {
+    const camname = verifySafeFileName(req.params.camname);
+    const date = verifySafeFileName(req.params.date);
+    const hour = verifySafeFileName(req.params.hour);
+    const basefn = verifySafeFileName(req.params.basename);
+    const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
+
+    await apiFileGenWrapper(req, res, async (tmpDir)=> {
+        const tmpFile = path.join(tmpDir, `${basefn}.jpg`);
+        await getVideoThumbnail(tsfile, tmpFile)
+        return tmpFile;
+    });
+}));
 
 
 router.all('/api/*', (req, res) => {
