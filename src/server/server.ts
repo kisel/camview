@@ -12,9 +12,14 @@ import { apiFileGenWrapper } from './tmpfileproc';
 const app = express();
 const router = express();
 
-router.get('/api/cameras/', apiWrapper<CamListResponse>(async req => {
-    return {
-        items: current_config.cameras
+router.get('/api/camera/', apiWrapper<CamListResponse>(async req => {
+    if (current_config.cameras != null && current_config.cameras.length > 0) {
+        return { items: current_config.cameras }
+    } else {
+        const dirnames = await getSubdirNames(current_config.storage);
+        return {
+            items: dirnames.map(dirname => ({ name: dirname }) as CameraDef)
+        }
     }
 }));
 
@@ -72,7 +77,7 @@ function getStoragePathFromParams(req: express.Request, keys: string[]): string 
     return resPath;
 }
 
-router.get('/api/thumbnail/:camname/:date/:hour/:basename.jpg', errorWrapper(async (req, res) => {
+router.get('/api/thumbnail/:camname/:date/:hour/:basename.:ext/', errorWrapper(async (req, res) => {
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);

@@ -11,7 +11,7 @@ const frontend = {
   },
   output: {
     path: path.resolve(__dirname, './public'),
-    publicPath: '',
+    publicPath: '/',
     filename: '[name].[hash].js'
   },
   module: {

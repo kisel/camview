@@ -1,15 +1,13 @@
 // debug/development only webpack configuration
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const WebpackBuildNotifierPlugin = require('webpack-build-notifier');
 
 const appConfig = {
     backendHost: process.env.BACKEND_HOST || 'localhost',
     backendPort: parseInt(process.env.BACKEND_PORT || '8000'),
     webpackPort: parseInt(process.env.FRONTEND_PORT || '8080'),
-    baseUrl: process.env.BASE_URL || '/',
 }
-const base_url = appConfig.baseUrl + '/';
+const base_url = process.env.BASE_URL || '/';
 const config = require('../webpack.config.js');
 const frontEndEntry = config[0];
 
@@ -46,28 +44,14 @@ const server = new WebpackDevServer(compiler, {
 
   host: appConfig.backendHost,
   port: appConfig.webpackPort,
-  publicPath: base_url,
+  //publicPath: base_url,
 
-  historyApiFallback: {
-    rewrites: [
-      { from: /.*/, to: base_url }
-    ]
-  },
+  historyApiFallback: true,
 
   // Set this if you want to enable gzip compression for assets
   compress: false,
 
-  // route socketio and all REST/WS/API calls to the backend server,
-  // everything else will be handled by webpack server as frontend resources
-  // see https://github.com/webpack/webpack-dev-server/pull/127
   proxy: {
-    [`${base_url}socket.io/**`]: {
-        target: `ws://${appConfig.backendHost}:${appConfig.backendPort}/`,
-        changeOrigin: true,
-        ws: true,
-        timeout: 1000 * 60 * 10,
-        proxyTimeout: 1000 * 60 * 10,
-    },
     [`${base_url}api/**`]: backend_proxy_options,
   },
 

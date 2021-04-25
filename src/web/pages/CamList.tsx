@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {render} from 'react-dom';
+import { CameraList } from '../components/cameras';
 
-export const CamList = () => {
+export const MainPage = () => {
     return (<div>
-        hello
+        <CameraList/>
     </div>);
 }
