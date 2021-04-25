@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "outDir": "./app",
+        "target": "es2017",
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "noImplicitAny": false,
+        "noImplicitThis": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "jsx": "react"
+    },
+    "suppressImplicitAnyIndexErrors": true,
+    "lib": [
+        "dom",
+        "es2017"
+    ],
+    "baseUrl": ".",
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "dist"
+    ]
+}

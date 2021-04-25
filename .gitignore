@@ -1,0 +1,10 @@
+.vscode
+.venv*
+node_modules
+public
+dist
+tmp
+*.sw?
+.git
+config.json
+
