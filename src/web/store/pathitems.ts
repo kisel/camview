@@ -1,10 +1,10 @@
 import { observable, autorun } from "mobx";
-import { ListResponse } from "../../common/models";
+import { ListItem, ListResponse } from "../../common/models";
 import { theLocation } from "./location";
 
 class PathItemsStore {
-    @observable currentPath;
-    @observable subItems;
+    @observable currentPath: string[] = [];
+    @observable subItems: string[] = [];
 }
 
 export const thePathItemsStore = new PathItemsStore();

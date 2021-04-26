@@ -1,9 +1,9 @@
 import {observer} from 'mobx-react-lite';
 import {autorun, observable} from 'mobx';
-import { CameraDef, CamListResponse } from './common/models';
+import { CameraDef, CamListResponse } from '../../common/models';
 
 class AppState {
-    @observable cams: CameraDef[];
+    @observable cams: CameraDef[] = [];
 }
 
 autorun(()=>{

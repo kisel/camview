@@ -5,7 +5,7 @@ import _ = require("lodash");
 import { theLocation } from "../store/location";
 import { thePathItemsStore } from "../store/pathitems";
 
-export const CameraTimeline = observer(() => {
+export const CameraGrid = observer(() => {
     const {subItems, currentPath} = thePathItemsStore;
     return (
         <Container className="clickable-cards">
@@ -27,6 +27,3 @@ export const CameraTimeline = observer(() => {
         </Container>
     );
 });
-
-export const CameraList = CameraTimeline;
-
