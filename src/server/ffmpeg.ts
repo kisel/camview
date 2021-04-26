@@ -21,5 +21,8 @@ export function convertToMp4(srcPath: string, dstPath: string) {
 
 // generate a single image from video
 export function getVideoThumbnail(srcPath: string, dstPath: string) {
-    return ffmpeg(['-skip_frame', 'nokey', '-i', srcPath, '-frames:v', '1', dstPath]);
+    return ffmpeg(['-skip_frame', 'nokey',
+        '-fflags', '+genpts+discardcorrupt',
+        '-i', srcPath, '-frames:v', '1', dstPath
+    ]);
 }
