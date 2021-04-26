@@ -1,1 +1,4 @@
 /* placeholder */
+.clickable-cards .card {
+    cursor: pointer;
+}

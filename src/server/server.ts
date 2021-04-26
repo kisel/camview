@@ -12,7 +12,7 @@ import { apiFileGenWrapper } from './tmpfileproc';
 const app = express();
 const router = express();
 
-router.get('/api/camera/', apiWrapper<CamListResponse>(async req => {
+router.get('/api/list/', apiWrapper<CamListResponse>(async req => {
     if (current_config.cameras != null && current_config.cameras.length > 0) {
         return { items: current_config.cameras }
     } else {
@@ -23,12 +23,12 @@ router.get('/api/camera/', apiWrapper<CamListResponse>(async req => {
     }
 }));
 
-router.get('/api/list/', apiWrapper<ListResponse>(async req => {
-    const dirnames = await getSubdirNames(current_config.storage);
-    return {
-        items: dirnames.map( dirname => ({name: dirname}) as ListItem)
-    }
-}));
+// router.get('/api/list/', apiWrapper<ListResponse>(async req => {
+//     const dirnames = await getSubdirNames(current_config.storage);
+//     return {
+//         items: dirnames.map( dirname => ({name: dirname}) as ListItem)
+//     }
+// }));
 
 router.get('/api/list/:camname', apiWrapper<ListResponse>(async req => {
     const camname = verifySafeFileName(req.params.camname);
