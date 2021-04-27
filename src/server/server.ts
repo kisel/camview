@@ -143,7 +143,13 @@ router.all('/api/*', (req, res) => {
 const publicDir = path.join(__dirname, '../../public');
 router.use(express.static(publicDir));
 
+router.get('/token/*', (req, res) => {
+    // dummy route for external authorization
+    res.redirect('/');
+});
+
 router.get('*', (req, res) => {
+    console.log(`Serving index.html to ${req.url} client: ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`)
     res.sendFile('index.html', {root: publicDir});
 });
 
