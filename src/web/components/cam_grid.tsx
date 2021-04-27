@@ -14,7 +14,7 @@ export const CameraGrid = observer(() => {
             {_.map(subItems, k => {
                 const newPath = [...currentPath, k]
                 return (
-                    <div className="col-4" key={k}>
+                    <div className="col-lg-4" key={k}>
                         <div className="card" onClick={() => theLocation.change(urljoin('/view/', ...newPath, '/'))}>
                             <img className="card-img-top" src={urljoin('/api/thumbnail/', ...newPath, '/')} />
                             <div className="card-body">
