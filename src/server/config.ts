@@ -8,6 +8,8 @@ export interface Config {
     storage: string;  // path to video data storage
     cachedir: string; // cache / temp directory
     cameras?: CameraDef[] | null;
+    cache_time: number; // time in sec to cache http responses
+    thumbnail_width: number; // width of thumbnails in px
 }
 
 const default_config: Config = {
@@ -15,6 +17,8 @@ const default_config: Config = {
     storage: process.env.STORAGE  || '/tmp/camview-storage',
     cachedir: process.env.CACHEDIR || '/tmp/camview-cache',
     cameras: null,
+    thumbnail_width: 800,
+    cache_time: 300,
 }
 
 function loadConfig(): Config {

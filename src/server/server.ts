@@ -96,7 +96,7 @@ function tsFileFilter(fi: FileInfo) {
 }
 
 const fullPathLen = ['camname', 'date', 'hour'].length;
-async function deepThumbHandler(req: express.Request, res: express.Response, paramKeys: string[]) {
+async function deepThumbHandler(req: express.Request, res: express.Response, paramKeys: string[], cacheTime?: number) {
     const relPath = paramKeys.map(k => verifySafeFileName(req.params[k]));
     const searchdir = path.join(current_config.storage, ...relPath);
     const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter);
@@ -104,7 +104,10 @@ async function deepThumbHandler(req: express.Request, res: express.Response, par
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `thumbnail.jpg`);
-        await getVideoThumbnail(fi.fullpath, tmpFile)
+        await getVideoThumbnail(fi.fullpath, tmpFile);
+        if (tmpFile && cacheTime != 0) {
+            res.set('Cache-control', `public, max-age=${cacheTime || current_config.cache_time}`)
+        }
         return tmpFile;
     });
 }
@@ -117,7 +120,7 @@ router.get('/api/thumbnail/:camname/:date/', errorWrapper(async (req, res) => {
 }));
 
 router.get('/api/thumbnail/:camname/', errorWrapper(async (req, res) => {
-    await deepThumbHandler(req, res, ['camname'])
+    await deepThumbHandler(req, res, ['camname'], 0)
 }));
 
 router.all('/api/*', (req, res) => {
