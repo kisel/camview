@@ -100,7 +100,7 @@ async function deepThumbHandler(req: express.Request, res: express.Response, par
     const relPath = paramKeys.map(k => verifySafeFileName(req.params[k]));
     const searchdir = path.join(current_config.storage, ...relPath);
     const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter);
-    console.log("found last:", fi.fullpath)
+    // console.log("found last:", fi.fullpath)
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `thumbnail.jpg`);
@@ -119,22 +119,6 @@ router.get('/api/thumbnail/:camname/:date/', errorWrapper(async (req, res) => {
 router.get('/api/thumbnail/:camname/', errorWrapper(async (req, res) => {
     await deepThumbHandler(req, res, ['camname'])
 }));
-
-// router.get('/api/thumbnail/:camname/:date/:hour/', errorWrapper(async (req, res) => {
-//     const camname = verifySafeFileName(req.params.camname);
-//     const date = verifySafeFileName(req.params.date);
-//     const hour = verifySafeFileName(req.params.hour);
-//     const searchdir = path.join(current_config.storage, camname, date, hour);
-//     const fi = await findNewestFileDeep(searchdir, 0, tsFileFilter);
-
-//     await apiFileGenWrapper(req, res, async (tmpDir)=> {
-//         const tmpFile = path.join(tmpDir, `thumbnail.jpg`);
-//         await getVideoThumbnail(fi.fullpath, tmpFile)
-//         return tmpFile;
-//     });
-// }));
-
-
 
 router.all('/api/*', (req, res) => {
     res.status(404).json({error: `method not found: ${req.path}`});

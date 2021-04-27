@@ -5,8 +5,8 @@ export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
         // console.log(['ffmpeg', ...ffmpegArgs].join(' '))
         const proc = child_process.spawn('ffmpeg', ffmpegArgs, { stdio: 'ignore' });
         proc.on('close', (code) => {
-            console.log(`ffmpeg exit code: ${code}`)
             if (code != 0) {
+                console.log(`ffmpeg exit code: ${code}. command: ffmpeg ${ffmpegArgs.join(' ')}`)
                 reject(new Error(`Ffmpeg failed`));
             } else {
                 resolve();
@@ -21,8 +21,13 @@ export function convertToMp4(srcPath: string, dstPath: string) {
 
 // generate a single image from video
 export function getVideoThumbnail(srcPath: string, dstPath: string) {
-    return ffmpeg(['-skip_frame', 'nokey',
+    return ffmpeg([
+        '-skip_frame', 'nokey',
         '-fflags', '+genpts+discardcorrupt',
-        '-i', srcPath, '-frames:v', '1', dstPath
+        '-i', srcPath,
+        '-vcodec', 'mjpeg',
+        '-filter:v', 'scale=800:-1',
+        '-frames:v', '1',
+        dstPath
     ]);
 }
