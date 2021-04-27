@@ -13,14 +13,17 @@ export const CameraGrid = observer(() => {
             <Row>
             {_.map(subItems, k => {
                 const newPath = [...currentPath, k]
+                const playerURL = urljoin('/view/', ...newPath, '/');
                 return (
                     <div className="col-lg-4" key={k}>
-                        <div className="card" onClick={() => theLocation.change(urljoin('/view/', ...newPath, '/'))}>
-                            <img className="card-img-top" src={urljoin('/api/thumbnail/', ...newPath, '/')} />
-                            <div className="card-body">
-                                <p className="card-text">{k}</p>
+                        <a href={playerURL} onClick={() => theLocation.change(playerURL)}>
+                            <div className="card">
+                                <img className="card-img-top" src={urljoin('/api/thumbnail/', ...newPath, '/')} />
+                                <div className="card-body">
+                                    <p className="card-text">{k}</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 )
             })}
