@@ -3,8 +3,12 @@ import { current_config } from './config';
 
 export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        // console.log(['ffmpeg', ...ffmpegArgs].join(' '))
-        const proc = child_process.spawn('ffmpeg', ffmpegArgs, { stdio: 'ignore' });
+        const {debug} = current_config;
+        if (debug) {
+            console.log(['ffmpeg', ...ffmpegArgs].join(' '))
+        }
+        const stdio = (debug > 0) ? 'inherit' : 'ignore';
+        const proc = child_process.spawn('ffmpeg', ffmpegArgs, { stdio });
         proc.on('close', (code) => {
             if (code != 0) {
                 console.log(`ffmpeg exit code: ${code}. command: ffmpeg ${ffmpegArgs.join(' ')}`)
@@ -16,8 +20,18 @@ export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
     });
 }
 
+// change container format only (TS -> MP4)
 export function convertToMp4(srcPath: string, dstPath: string) {
     return ffmpeg(['-i', srcPath, '-c:v', 'copy', dstPath]);
+}
+
+// reencode as a single file for dumb devices
+export function reencodeToMp4H264(srcPath: string, dstPath: string) {
+    return ffmpeg([
+        '-i', srcPath,
+        ...'-vcodec libx264 -acodec aac -profile:v main -preset ultrafast -s hd720'.split(/ +/),
+        dstPath
+    ]);
 }
 
 // generate a single image from video

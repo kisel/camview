@@ -10,6 +10,7 @@ export interface Config {
     cameras?: CameraDef[] | null;
     cache_time: number; // time in sec to cache http responses
     thumbnail_width: number; // width of thumbnails in px
+    debug: number; // debug log level
 }
 
 const default_config: Config = {
@@ -19,6 +20,7 @@ const default_config: Config = {
     cameras: null,
     thumbnail_width: 800,
     cache_time: 300,
+    debug: 0,
 }
 
 function loadConfig(): Config {

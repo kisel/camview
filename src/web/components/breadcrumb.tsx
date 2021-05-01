@@ -21,6 +21,9 @@ export const CamPathBreadbrumb = observer(() => {
                     </BreadcrumbItem>
                 )
             })}
+            <BreadcrumbItem className="ml-auto" onClick={() => theLocation.change('/settings/')}>
+                Settings
+            </BreadcrumbItem>
         </Breadcrumb>
     );
 });

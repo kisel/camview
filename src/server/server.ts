@@ -5,7 +5,7 @@ import {current_config} from './config'
 import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
-import { convertToMp4, getVideoThumbnail } from './ffmpeg';
+import { convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
 
 import tmp = require('tmp');
@@ -59,16 +59,23 @@ router.get('/api/list/:camname/:date/:hour', apiWrapper<ListResponse>(async req 
     }
 }));
 
-router.get('/api/mp4/:camname/:date/:hour/:basename.mp4', errorWrapper(async (req, res) => {
+router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour/:basename.mp4', errorWrapper(async (req, res) => {
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
+    const {vformat} = req.params;
     const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.mp4`);
-        await convertToMp4(tsfile, tmpFile)
+        if (vformat == "mp4-legacy") {
+            await reencodeToMp4H264(tsfile, tmpFile)
+        } else if (vformat == "mp4") {
+            await convertToMp4(tsfile, tmpFile)
+        } else {
+            console.log(`Incorrect request: ${req.url}`)
+        }
         return tmpFile;
     });
 }));
