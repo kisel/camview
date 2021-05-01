@@ -1,4 +1,5 @@
 import child_process = require('child_process')
+import { current_config } from './config';
 
 export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -26,7 +27,7 @@ export function getVideoThumbnail(srcPath: string, dstPath: string) {
         '-fflags', '+genpts+discardcorrupt',
         '-i', srcPath,
         '-vcodec', 'mjpeg',
-        '-filter:v', 'scale=800:-1',
+        '-filter:v', `scale=${current_config.thumbnail_width}:-1`,
         '-frames:v', '1',
         dstPath
     ]);
