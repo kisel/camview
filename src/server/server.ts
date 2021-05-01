@@ -5,9 +5,11 @@ import {current_config} from './config'
 import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
-import tmp = require('tmp');
 import { convertToMp4, getVideoThumbnail } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
+
+import tmp = require('tmp');
+tmp.setGracefulCleanup();
 
 const app = express();
 const router = express();

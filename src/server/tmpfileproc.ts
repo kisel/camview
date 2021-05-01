@@ -8,7 +8,7 @@ type FileGenerator = (tmppath: string) => Promise<string>;
 
 export function apiFileGenWrapper(req: express.Request, res: express.Response, gen: FileGenerator): Promise<void> {
     return new Promise<void>((wrapperResolve) => {
-        tmp.dir({ template: 'camview-XXXXXX' }, async (err, tmppath, cleanupCallback) => {
+        tmp.dir({ template: 'camview-XXXXXX', unsafeCleanup: true }, async (err, tmppath, cleanupCallback) => {
             if (err) {
                 apiError(res, err);
             } else {
