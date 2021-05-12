@@ -86,7 +86,8 @@ function getStoragePathFromParams(req: express.Request, keys: string[]): string 
     return resPath;
 }
 
-router.get('/api/thumbnail/:camname/:date/:hour/:basename.:ext/', errorWrapper(async (req, res) => {
+router.get('/api/image/:camname/:date/:hour/:basename.:ext/', errorWrapper(async (req, res) => {
+    const {resolution} = req.query as any;
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
@@ -95,7 +96,7 @@ router.get('/api/thumbnail/:camname/:date/:hour/:basename.:ext/', errorWrapper(a
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.jpg`);
-        await getVideoThumbnail(tsfile, tmpFile)
+        await getVideoThumbnail(tsfile, tmpFile, resolution)
         return tmpFile;
     });
 }));
@@ -106,6 +107,7 @@ function tsFileFilter(fi: FileInfo) {
 
 const fullPathLen = ['camname', 'date', 'hour'].length;
 async function deepThumbHandler(req: express.Request, res: express.Response, paramKeys: string[], cacheTime?: number) {
+    const {resolution} = req.query as any;
     const relPath = paramKeys.map(k => verifySafeFileName(req.params[k]));
     const searchdir = path.join(current_config.storage, ...relPath);
     const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter);
@@ -113,22 +115,22 @@ async function deepThumbHandler(req: express.Request, res: express.Response, par
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `thumbnail.jpg`);
-        await getVideoThumbnail(fi.fullpath, tmpFile);
+        await getVideoThumbnail(fi.fullpath, tmpFile, resolution);
         if (tmpFile && cacheTime != 0) {
             res.set('Cache-control', `public, max-age=${cacheTime || current_config.cache_time}`)
         }
         return tmpFile;
     });
 }
-router.get('/api/thumbnail/:camname/:date/:hour/', errorWrapper(async (req, res) => {
+router.get('/api/image/:camname/:date/:hour/', errorWrapper(async (req, res) => {
     await deepThumbHandler(req, res, ['camname', 'date', 'hour'])
 }));
 
-router.get('/api/thumbnail/:camname/:date/', errorWrapper(async (req, res) => {
+router.get('/api/image/:camname/:date/', errorWrapper(async (req, res) => {
     await deepThumbHandler(req, res, ['camname', 'date'])
 }));
 
-router.get('/api/thumbnail/:camname/', errorWrapper(async (req, res) => {
+router.get('/api/image/:camname/', errorWrapper(async (req, res) => {
     await deepThumbHandler(req, res, ['camname'], 0)
 }));
 

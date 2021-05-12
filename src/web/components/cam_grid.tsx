@@ -18,7 +18,7 @@ export const CameraGrid = observer(() => {
                     <div className="col-lg-4" key={k}>
                         <a href={playerURL} onClick={() => theLocation.change(playerURL)}>
                             <div className="card">
-                                <img className="card-img-top" src={urljoin('/api/thumbnail/', ...newPath, '/')} />
+                                <img className="card-img-top" src={urljoin('/api/image/', ...newPath, '/?resolution=thumbnail')} />
                                 <div className="card-body">
                                     <p className="card-text">{k}</p>
                                 </div>

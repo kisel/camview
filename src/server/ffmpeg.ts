@@ -35,13 +35,20 @@ export function reencodeToMp4H264(srcPath: string, dstPath: string) {
 }
 
 // generate a single image from video
-export function getVideoThumbnail(srcPath: string, dstPath: string) {
+export function getVideoThumbnail(srcPath: string, dstPath: string, resolution: string) {
+    let vfilter: string[] = []
+    if (resolution == 'thumbnail') {
+        vfilter = ['-filter:v', `scale=${current_config.thumbnail_width}:-1`]
+    } if ([null, undefined, 'original'].includes(resolution)) {
+        vfilter = []
+    }
+
     return ffmpeg([
         '-skip_frame', 'nokey',
         '-fflags', '+genpts+discardcorrupt',
         '-i', srcPath,
         '-vcodec', 'mjpeg',
-        '-filter:v', `scale=${current_config.thumbnail_width}:-1`,
+        ...vfilter,
         '-frames:v', '1',
         dstPath
     ]);
