@@ -1,0 +1,12 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "camview.fullname" . }}
+  labels:
+    {{- include "camview.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {
+      "workdir": "/tmp/",
+      "storage": "{{.Values.camPath}}"
+    }
