@@ -18,6 +18,15 @@ export const CamVideoPlayer = observer(() => {
                 controls: true,
                 responsive: true,
                 fluid: true,
+                fill: true,
+                preload: 'auto',
+                html5: {
+                  hls: {
+                    enableLowInitialPlaylist: true,
+                    smoothQualityChange: true,
+                    overrideNative: true,
+                  },
+                },
                 playbackRates: [1, 2, 5, 10, 20, 30],
                 sources: [
                     {src: videoURL, type: 'video/mp4'}

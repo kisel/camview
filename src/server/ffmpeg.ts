@@ -1,5 +1,6 @@
 import child_process = require('child_process')
 import { current_config } from './config';
+// consider -movflags faststart
 
 export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
