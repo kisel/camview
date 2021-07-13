@@ -5,7 +5,7 @@ import {current_config} from './config'
 import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
-import { convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
+import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
 
 import tmp = require('tmp');
@@ -79,6 +79,33 @@ router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour/:basename.m
         return tmpFile;
     });
 }));
+
+// concatenated video for the hour
+router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour.mp4', errorWrapper(async (req, res) => {
+    const camname = verifySafeFileName(req.params.camname);
+    const date = verifySafeFileName(req.params.date);
+    const hour = verifySafeFileName(req.params.hour);
+    const {vformat} = req.params;
+    const baseDir = path.join(current_config.storage, camname, date, hour)
+    let filenames = await getDirFilenames(baseDir, /.*[.]ts$/);
+    filenames.sort();
+    filenames = filenames.map(fn => path.join(baseDir, fn))
+
+    await apiFileGenWrapper(req, res, async (tmpDir)=> {
+        const tmpFile = path.join(tmpDir, `${date}_${hour}.mp4`);
+        if (vformat == "mp4-legacy") {
+            throw new Error("not implemented");
+        } else if (vformat == "mp4") {
+            const {done, stop} = convertFilesToMp4(filenames, tmpFile)
+            req.on("close", () => stop())
+            await done;
+        } else {
+            console.log(`Incorrect request: ${req.url}`)
+        }
+        return tmpFile;
+    });
+}));
+
 
 function getStoragePathFromParams(req: express.Request, keys: string[]): string {
     const paramPath = keys.map(k => verifySafeFileName(req.params[k]));

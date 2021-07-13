@@ -7,6 +7,9 @@ import { apiError } from "./utils";
 type FileGenerator = (tmppath: string) => Promise<string>;
 
 export function apiFileGenWrapper(req: express.Request, res: express.Response, gen: FileGenerator): Promise<void> {
+    req.on("close", () => {
+        console.log(`Request ${req.path} closed`)
+    })
     return new Promise<void>((wrapperResolve) => {
         tmp.dir({ template: 'camview-XXXXXX', unsafeCleanup: true }, async (err, tmppath, cleanupCallback) => {
             if (err) {

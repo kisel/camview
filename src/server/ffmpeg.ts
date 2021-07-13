@@ -1,6 +1,19 @@
 import child_process = require('child_process')
+import fs = require('fs')
+const MultiStream = require('multistream')
 import { current_config } from './config';
+
 // consider -movflags faststart
+
+export interface FfmpegJob {
+    done: Promise<void>;
+    stop: () => void;
+}
+
+function blackhole() {
+    const { debug } = current_config;
+    return (debug > 0) ? 'inherit' : 'ignore';
+}
 
 export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -24,6 +37,39 @@ export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
 // change container format only (TS -> MP4)
 export function convertToMp4(srcPath: string, dstPath: string) {
     return ffmpeg(['-i', srcPath, '-c:v', 'copy', dstPath]);
+}
+
+// change container format only (TS -> MP4)
+export function convertFilesToMp4(srcFiles: string[], dstPath: string): FfmpegJob {
+    const ctx = {
+        ffmpeg: null as child_process.ChildProcess
+    }
+    const stop = () => {
+        if (ctx.ffmpeg != null) {
+            console.log(`Interrupting ffmpeg process: pid=${ctx.ffmpeg.pid} dst=${dstPath}`)
+            ctx.ffmpeg.kill();
+        }
+    }
+
+    const done = new Promise<void>((resolve, reject) => {
+        const ffmpegArgs = ['-i', '-', '-c:v', 'copy', dstPath];
+
+        const lazyStreams = srcFiles.map((fn) => () => fs.createReadStream(fn))
+        ctx.ffmpeg = child_process.spawn('ffmpeg', ffmpegArgs, {stdio: ['pipe', blackhole(), blackhole()]});
+        (new MultiStream(lazyStreams)).pipe(ctx.ffmpeg.stdin)
+
+        ctx.ffmpeg.on('close', (code) => {
+            ctx.ffmpeg = null;
+            if (code != 0) {
+                console.log(`ffmpeg exit code: ${code}. command: ffmpeg ${ffmpegArgs.join(' ')}`)
+                reject(new Error(`Ffmpeg failed`));
+            } else {
+                resolve();
+            }
+        });
+    });
+
+    return {done, stop};
 }
 
 // reencode as a single file for dumb devices
