@@ -35,3 +35,16 @@ export function errorWrapper(handler: (req: express.Request, response: express.R
             });
     };
 }
+
+export class CtxGuard {
+    ctxFunc: () => any;
+    ctx: string;
+    constructor(ctxFunc: () => any) {
+        this.ctxFunc = ctxFunc;
+        this.ctx = JSON.stringify(this.ctxFunc())
+    }
+    // true only if the context determined by ctxFunc is the same as was when the object was constructed
+    unchanged() {
+        return this.ctx === JSON.stringify(this.ctxFunc())
+    }
+}
