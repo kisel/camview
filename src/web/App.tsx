@@ -3,18 +3,19 @@ import {render} from 'react-dom';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import { observer } from 'mobx-react-lite';
-import { Container } from 'react-bootstrap';
 import { CamPathBreadbrumb } from './components/breadcrumb';
 import { AppRouter } from './pages/router';
+import { theSettings } from './store/settings';
 
 
 export const App = observer(() => (
-    <Container>
+    <div className={theSettings.with_borders ? "container" : "container-fluid"}>
         <CamPathBreadbrumb/>
         <AppRouter/>
-    </Container>
+    </div>
 ));
 
 render(<App/>, document.getElementById('app'));

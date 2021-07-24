@@ -2,3 +2,8 @@
 .clickable-cards .card {
     cursor: pointer;
 }
+
+
+ol.breadcrumb {
+    padding: 0.2em 1em;
+}
