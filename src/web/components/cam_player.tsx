@@ -52,6 +52,24 @@ const CamVideoPlayerLegacy = observer(() => {
     );
 });
 
+export const CameraRealtime = observer(() => {
+    const camid = theLocation.path.split('/')[2];
+    const videoURL = `/api/streams/data/${camid}/s.m3u8`
+    return (
+        <VideoPlayer {...{
+            className: "video-container",
+            autoplay: true,
+            controls: true,
+            responsive: true, //
+            preload: 'auto',
+            // html5: {},
+            sources: [
+                { src: videoURL, type: 'application/x-mpegURL' }
+            ]
+        }} />
+    );
+});
+
 export const CamVideoPlayer = observer(() => {
     return (theSettingsStore.settings.native_player)
         ? <CamVideoPlayerLegacy/>

@@ -161,8 +161,13 @@ router.get('/api/image/:camname/', errorWrapper(async (req, res) => {
     await deepThumbHandler(req, res, ['camname'], 0)
 }));
 
+if (current_config.streams) {
+    console.log(`Mounted ${current_config.streams} to /api/streams/data`)
+    router.use('/api/streams/data/', express.static(current_config.streams));
+}
+
 router.all('/api/*', (req, res) => {
-    res.status(404).json({error: `method not found: ${req.path}`});
+    res.status(404).json({error: `not found: ${req.path}`});
 });
 
 const publicDir = path.join(__dirname, '../../public');

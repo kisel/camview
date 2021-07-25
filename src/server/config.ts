@@ -11,10 +11,12 @@ export interface Config {
     cache_time: number; // time in sec to cache http responses
     thumbnail_width: number; // width of thumbnails in px
     debug: number; // debug log level
+    streams?: string // path to realtime HLS streams /dev/shm/streams/ with layout $camname/s.m3u8
 }
 
 const default_config: Config = {
     http_port: parseInt(process.env.PORT) || 8000,
+    streams: process.env.RT_STREAM,
     storage: process.env.STORAGE  || '/tmp/camview-storage',
     cachedir: process.env.CACHEDIR || '/tmp/camview-cache',
     cameras: null,

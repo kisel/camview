@@ -1,9 +1,12 @@
 /* placeholder */
-.clickable-cards .card {
+.clickable-cards .card img {
     cursor: pointer;
 }
 
+.camera-card {
+    padding: 0.5em !important;
+}
 
-ol.breadcrumb {
-    padding: 0.2em 1em;
+.camera-card * {
+    margin: 0 0.5em;
 }

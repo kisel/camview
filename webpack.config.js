@@ -34,12 +34,18 @@ const frontend = {
         test: /\.(png|jpg|gif|ttf)$/,
         loader: 'file-loader',
         options: {
-          name: '[name]-[contenthash].[ext]'
+          name: '[name]-[contenthash].[ext]',
+          esModule: false,
         }
       },
       {
-        test: [/\.svg$/],
-        loader: 'raw-loader'
+        test: /\.(svg)$/,
+        loader: 'file-loader',
+        //loader: 'raw-loader',
+        options: {
+          name: '[name]-[contenthash].[ext]',
+          esModule: false,
+        }
       },
     ]
   },

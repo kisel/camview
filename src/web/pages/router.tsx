@@ -1,11 +1,10 @@
 import React = require("react");
 import { observer } from "mobx-react-lite";
-import { CameraGrid } from "../components/cam_grid";
-import { CamVideoPlayer } from "../components/cam_player";
+import { CameraGrid, } from "../components/cam_grid";
+import { CamVideoPlayer, CameraRealtime } from "../components/cam_player";
 import { theLocation } from "../store/location";
 import { autorun } from "mobx";
 import { MainPage } from "./main_page";
-import { SettingsPage } from "./settings";
 
 export const AppRouter = observer(() => {
     const {path: locPath} = theLocation;
@@ -15,6 +14,8 @@ export const AppRouter = observer(() => {
           return <CamVideoPlayer/>;
     } else if (/^[/]view[/].*/.test(locPath)) {
           return <CameraGrid/>;
+    } else if (/^[/]online[/].*/.test(locPath)) {
+          return <CameraRealtime/>;
     } else {
         return <div>Not found</div>
     }
