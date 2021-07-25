@@ -19,18 +19,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
-      -
-        name: Set up QEMU
-        id: qemu
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: amd64,arm,arm64
-      -
-        name: Set up Docker Buildx
+
+      #- name: Set up QEMU
+      #  id: qemu
+      #  uses: docker/setup-qemu-action@v1
+      #  with:
+      #    image: tonistiigi/binfmt:latest
+      #    platforms: amd64
+
+      - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
 
@@ -46,5 +45,5 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
           echo "Building image: $IMAGE_ID:$VERSION"
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 --push --cache-to=$IMAGE_ID:cache --cache-from=$IMAGE_ID:cache -t $IMAGE_ID:$VERSION .
+          docker buildx build --platform linux/amd64 --push --cache-to=$IMAGE_ID:cache --cache-from=$IMAGE_ID:cache -t $IMAGE_ID:$VERSION .
 
