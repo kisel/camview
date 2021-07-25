@@ -61,6 +61,7 @@ export const CameraRealtime = observer(() => {
             autoplay: true,
             controls: true,
             responsive: true, //
+            errorDisplay: false,
             preload: 'auto',
             // html5: {},
             sources: [
