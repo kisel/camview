@@ -3,6 +3,11 @@ import { CameraDef, CamListResponse } from '../../common/models';
 
 class AppState {
     @observable cams: CameraDef[] = [];
+    @observable expandedNav = false;
+
+    toggleNav() {
+        this.expandedNav = !this.expandedNav
+    }
 }
 
 autorun(()=>{
