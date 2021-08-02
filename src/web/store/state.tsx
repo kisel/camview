@@ -11,7 +11,7 @@ class AppState {
 }
 
 autorun(()=>{
-    fetch('/api/camera/')
+    fetch('/api/list/')
     .then(res => res.json())
     .then((res: CamListResponse) => {
         theAppState.cams = res.items;
