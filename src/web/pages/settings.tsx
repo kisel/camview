@@ -34,7 +34,7 @@ const NumSetting = observer(({name, label, min, max, step}: NumSettingProps) => 
     const hid = `setting-${name}`
 
     return (
-        <>
+        <div>
             <label htmlFor={hid} className="form-label">{name}</label>
             <input type="range" className="form-range" id={hid}
                 value={`${val}`}
@@ -43,7 +43,7 @@ const NumSetting = observer(({name, label, min, max, step}: NumSettingProps) => 
                 }
                 {...{ min, max, step }}
             />
-        </>
+        </div>
     );
 });
 
@@ -55,14 +55,14 @@ const DropdownSetting = observer(({name, label, choices}: DropdownSettingProps) 
     const hid = `setting-${name}`
 
     return (
-        <>
+        <div>
             <label htmlFor={hid} className="form-label">{name}</label>
             <select className="form-select form-select-sm"  onChange={(e)=> theSettingsStore.configure({[name]: e.target.value})} value={`${val}`}>
                 {choices.map((c)=>(
                     <option key={c}>{c}</option>
                 ))}
             </select>
-        </>
+        </div>
     );
 });
 
