@@ -24,6 +24,11 @@ def process_input(streamSrc, args):
     too_many_objects = 0
     process_frames = 1
     fps = 0
+    if args.mask:
+        mask = cv2.imread(args.mask, cv2.IMREAD_GRAYSCALE)
+        mask = cv2.resize(mask, base_resolution)
+    else:
+        mask = None
 
     while True:
         check, frame = video.read()
@@ -46,6 +51,8 @@ def process_input(streamSrc, args):
             log(f"detector on each {process_frames} frames")
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if mask is not None:
+            gray = cv2.bitwise_and(gray, mask) # black=ignore white=process
         #gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
         if ref_frame is None:
@@ -76,22 +83,24 @@ def process_input(streamSrc, args):
             if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
                     (x, y, w, h) = cv2.boundingRect(contour)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 3)
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 2)
             if not args.one_window:
                 cv2.imshow("Color Frame", frame)
                 cv2.imshow("Gray Frame", gray)
                 cv2.imshow("Delta Frame", delta_frame)
                 cv2.imshow("Threshold Frame", thres_frame)
             else:
-                sidebar = np.vstack((gray, delta_frame, thres_frame))
                 h, w = frame.shape[:2]
+                sidebar = g2c(np.vstack((gray, delta_frame, thres_frame)))
+                if mask is not None:
+                    # draw mask on red layer where gray image is placed
+                    sidebar[0:h, 0:w, 2][mask == 0] = 155
                 quad = np.hstack((
                     frame,
-                    g2c(cv2.resize(sidebar, [int(w/3), h]))
+                    cv2.resize(sidebar, [int(w/3), h])
                     ))
                 cv2.imshow("Quad", quad)
-            key = cv2.waitKey(1)
-            time.sleep(1.0 / args.fps)
+            key = cv2.waitKey(int(1000.0 / args.fps))
     video.release()
     if args.gui:
         cv2.destroyAllWindows()
@@ -112,6 +121,8 @@ def main():
     parser.add_argument('--fps', default=60, type=int, help='draw fps')
     # it always makes sense to limit fps input to reasonable 5 / 10fps
     parser.add_argument('--dps', default=10, type=int, help='max detector ticks per second')
+    parser.add_argument('-m', '--mask',
+            help='binary mask file' )
     parser.add_argument('-o', '--output',
             help='output stats json filename' )
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
