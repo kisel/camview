@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/bin/env python3
 
 import cv2
 import json
@@ -22,6 +22,7 @@ def process_input(streamSrc, args, writer=None):
     height, width = 0, 0
     minArea = 0
     move_seq_len = 0
+    longest_move_seq = 0
     motion_frames = 0
     too_many_objects = 0
     process_frames = 1
@@ -80,6 +81,7 @@ def process_input(streamSrc, args, writer=None):
 
         if move_seq_len > args.min_seq:
             motion_frames += 1
+            longest_move_seq = max(longest_move_seq, move_seq_len)
 
         if args.gui or writer:
             if move_seq_len >= args.min_seq:
@@ -110,7 +112,11 @@ def process_input(streamSrc, args, writer=None):
         cv2.destroyAllWindows()
     return {
             'stream': streamSrc,
-            'motion_frames_total': motion_frames,
+            'fps': fps,
+            'total_frames': frameIdx,
+            'duration': frameIdx / fps,
+            'motion_seconds_longest': longest_move_seq / fps,
+            'motion_seconds_total': motion_frames / fps,
             'too_many_objects': too_many_objects
             }
 

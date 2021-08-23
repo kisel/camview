@@ -6,4 +6,6 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install opencv-python-headless
+WORKDIR /app
+COPY motion_detector.py /app/
 
