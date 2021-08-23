@@ -11,7 +11,10 @@ import numpy as np
 GREEN = (0, 255, 0)
 log = lambda msg: None
 
-def process_input(streamSrc, args):
+# fixed resolution for simplicity, and we need resize & some blur anyway
+base_resolution = [800, 600]
+
+def process_input(streamSrc, args, writer=None):
     ref_frame = None
     video = cv2.VideoCapture(streamSrc)
 
@@ -19,7 +22,6 @@ def process_input(streamSrc, args):
     height, width = 0, 0
     minArea = 0
     move_seq_len = 0
-    base_resolution = [800, 600]
     motion_frames = 0
     too_many_objects = 0
     process_frames = 1
@@ -79,17 +81,12 @@ def process_input(streamSrc, args):
         if move_seq_len > args.min_seq:
             motion_frames += 1
 
-        if args.gui:
+        if args.gui or writer:
             if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
                     (x, y, w, h) = cv2.boundingRect(contour)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 2)
-            if not args.one_window:
-                cv2.imshow("Color Frame", frame)
-                cv2.imshow("Gray Frame", gray)
-                cv2.imshow("Delta Frame", delta_frame)
-                cv2.imshow("Threshold Frame", thres_frame)
-            else:
+            if args.extra:
                 h, w = frame.shape[:2]
                 sidebar = g2c(np.vstack((gray, delta_frame, thres_frame)))
                 if mask is not None:
@@ -99,8 +96,15 @@ def process_input(streamSrc, args):
                     frame,
                     cv2.resize(sidebar, [int(w/3), h])
                     ))
-                cv2.imshow("Quad", quad)
-            key = cv2.waitKey(int(1000.0 / args.fps))
+                oframe = quad
+            else:
+                oframe = frame
+            if writer is not None:
+                if not args.video_out_detect_only or move_seq_len > 0:
+                    writer.write(oframe)
+            if args.gui:
+                cv2.imshow("Output", oframe)
+                key = cv2.waitKey(int(1000.0 / args.fps))
     video.release()
     if args.gui:
         cv2.destroyAllWindows()
@@ -115,14 +119,23 @@ def g2c(g):
 
 def main():
     parser = argparse.ArgumentParser(description='Motion detector')
-    parser.add_argument('--gui', action='store_true')
+    parser.add_argument('-W', '--gui', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-W', '--one-window', action='store_true')
-    parser.add_argument('--fps', default=60, type=int, help='draw fps')
+    parser.add_argument('-E', '--extra', action='store_true',
+            help='draw debugging info')
+    parser.add_argument('--fps', default=30, type=int,
+            help='stream fps')
     # it always makes sense to limit fps input to reasonable 5 / 10fps
-    parser.add_argument('--dps', default=10, type=int, help='max detector ticks per second')
+    parser.add_argument('--dps', default=5, type=int,
+            help='max detector ticks per second')
     parser.add_argument('-m', '--mask',
             help='binary mask file' )
+    parser.add_argument('-O', '--video-out',
+            help='output video with VideoWriter')
+    parser.add_argument('-M', '--video-out-detect-only',
+            help='output only frames with movement')
+    parser.add_argument('--video-out-codec', default='MJPG',
+            help='output video with VideoWriter(default MJPG/avi)')
     parser.add_argument('-o', '--output',
             help='output stats json filename' )
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
@@ -140,19 +153,28 @@ def main():
 
     if type(args.threads) is int:
         cv2.setNumThreads(args.threads)
-    if args.one_window:
-       args.gui = True
     if args.gui or args.verbose:
         global log
         log = lambda msg: print(msg)
     detector_results = []
+    writer = None
+    if args.video_out:
+        fourcc = cv2.VideoWriter_fourcc(*args.video_out_codec)
+        w, h = base_resolution
+        if args.extra:
+            # space for sidebar
+            w = w + int(w/3)
+        writer = cv2.VideoWriter(args.video_out, fourcc, args.dps, [w, h])
+
     for streamSrc in args.input:
         t1 = time.time()
-        res = process_input(streamSrc, args)
+        res = process_input(streamSrc, args, writer=writer)
         t2 = time.time()
         res['process_time'] = t2 - t1
         detector_results.append(res)
         log(json.dumps(res, indent=2))
+    if writer is not None:
+        writer.release()
     if args.output:
         out = json.dumps({
             'detector_results': detector_results,
