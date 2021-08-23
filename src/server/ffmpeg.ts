@@ -3,7 +3,8 @@ import fs = require('fs')
 const MultiStream = require('multistream')
 import { current_config } from './config';
 
-// consider -movflags faststart
+// required for seek in produced mp4 files
+const ffmpeg_movflags = ['-movflags', 'faststart']
 
 export interface FfmpegJob {
     done: Promise<void>;
@@ -36,7 +37,7 @@ export function ffmpeg(ffmpegArgs: string[]): Promise<void> {
 
 // change container format only (TS -> MP4)
 export function convertToMp4(srcPath: string, dstPath: string) {
-    return ffmpeg(['-i', srcPath, '-c:v', 'copy', dstPath]);
+    return ffmpeg(['-i', srcPath, '-c:v', 'copy', ...ffmpeg_movflags, dstPath]);
 }
 
 // change container format only (TS -> MP4)
@@ -52,7 +53,7 @@ export function convertFilesToMp4(srcFiles: string[], dstPath: string): FfmpegJo
     }
 
     const done = new Promise<void>((resolve, reject) => {
-        const ffmpegArgs = ['-i', '-', '-c:v', 'copy', dstPath];
+        const ffmpegArgs = ['-i', '-', '-c:v', 'copy', ...ffmpeg_movflags, dstPath];
 
         const lazyStreams = srcFiles.map((fn) => () => fs.createReadStream(fn))
         ctx.ffmpeg = child_process.spawn('ffmpeg', ffmpegArgs, {stdio: ['pipe', blackhole(), blackhole()]});
@@ -77,6 +78,7 @@ export function reencodeToMp4H264(srcPath: string, dstPath: string) {
     return ffmpeg([
         '-i', srcPath,
         ...'-vcodec libx264 -acodec aac -profile:v main -preset ultrafast -s hd720'.split(/ +/),
+        ...ffmpeg_movflags,
         dstPath
     ]);
 }
