@@ -22,20 +22,28 @@ def process_input(streamSrc, args):
     base_resolution = [800, 600]
     motion_frames = 0
     too_many_objects = 0
+    process_frames = 1
+    fps = 0
 
     while True:
         check, frame = video.read()
         if not check:
             log("No frames to read")
             break
-        frame = cv2.resize(frame, base_resolution)
         frameIdx += 1
+        if frameIdx % process_frames != 0:
+            continue
+        frame = cv2.resize(frame, base_resolution)
         if frameIdx == 1:
             height, width = frame.shape[:2]
             minArea = width * height / args.factor
-            if args.gui:
-                log(f"Resol {width}x{height}")
-                log(f"minArea={minArea}")
+            fps = video.get(cv2.CAP_PROP_FPS) or args.fps
+            if fps > args.dps:
+                process_frames = int(fps / args.dps)
+            log(f"resolution: {width}x{height}")
+            log(f"minArea: {minArea}")
+            log(f"input fps: {fps}")
+            log(f"detector on each {process_frames} frames")
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         #gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -51,7 +59,7 @@ def process_input(streamSrc, args):
         thres_frame = cv2.threshold(delta_frame, 80, 255, cv2.THRESH_BINARY)[1]
         thres_frame = cv2.dilate(thres_frame, None, iterations=2)
 
-        cnts, _ = cv2.findContours(thres_frame.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts, _ = cv2.findContours(thres_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         moved_objects = [c for c in cnts if cv2.contourArea(c) > minArea]
         if len(moved_objects) > args.max_groups:
             too_many_objects += 1
@@ -65,7 +73,7 @@ def process_input(streamSrc, args):
             motion_frames += 1
 
         if args.gui:
-            if move_seq_len > args.min_seq:
+            if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
                     (x, y, w, h) = cv2.boundingRect(contour)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 3)
@@ -102,6 +110,8 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-W', '--one-window', action='store_true')
     parser.add_argument('--fps', default=60, type=int, help='draw fps')
+    # it always makes sense to limit fps input to reasonable 5 / 10fps
+    parser.add_argument('--dps', default=10, type=int, help='max detector ticks per second')
     parser.add_argument('-o', '--output',
             help='output stats json filename' )
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
@@ -112,7 +122,7 @@ def main():
             help='ignore false detections of too many objects due cam reinit' )
     parser.add_argument('--threads', type=int,
             help='cv2.setNumThreads. 0 - no threads')
-    parser.add_argument('--min-seq', type=int, default=3,
+    parser.add_argument('--min-seq', type=int, default=2,
             help='minimal sequence of changed frames to capture movement' )
     parser.add_argument('input', nargs='+', help="file/rtsp stream")
     args=parser.parse_args()
@@ -122,6 +132,7 @@ def main():
     if args.one_window:
        args.gui = True
     if args.gui or args.verbose:
+        global log
         log = lambda msg: print(msg)
     detector_results = []
     for streamSrc in args.input:
@@ -134,7 +145,8 @@ def main():
     if args.output:
         out = json.dumps({
             'detector_results': detector_results,
-            'args': sys.argv,
+            'cli_args': sys.argv,
+            'options': vars(args),
             }, indent=2)
         if args.output == '-':
             print(out)
