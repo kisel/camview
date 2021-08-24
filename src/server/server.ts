@@ -137,10 +137,10 @@ function tsFileFilter(fi: FileInfo) {
 
 const fullPathLen = ['camname', 'date', 'hour'].length;
 async function deepThumbHandler(req: express.Request, res: express.Response, paramKeys: string[], cacheTime?: number) {
-    const {resolution, favourite_time} = req.query as any;
+    const {resolution, def_hour} = req.query as any;
     const relPath = paramKeys.map(k => verifySafeFileName(req.params[k]));
     const searchdir = path.join(current_config.storage, ...relPath);
-    const searchdefaults = (favourite_time && isSafeFileName(favourite_time)) ? [undefined, favourite_time] : undefined
+    const searchdefaults = (def_hour && isSafeFileName(def_hour)) ? [undefined, def_hour] : undefined
     const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter, searchdefaults);
     // console.log("found last:", fi.fullpath)
 

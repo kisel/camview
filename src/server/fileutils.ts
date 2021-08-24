@@ -45,7 +45,6 @@ export async function getDirFilenames(dir: string, file_regexp: RegExp): Promise
 
 export interface FileInfo {
     name: string;
-    parentPath: string;
     fullpath: string;
     fstat: fse.Stats;
 }
@@ -74,14 +73,17 @@ export async function findNewestFileDeep(dir: string, depth: number, fileFilter:
     let items = await readDirStat(dir);
     items.sort(sortNewestFirst);
     if (defaults && defaults[depth]) {
-        items.push(defaults['depth'])
+        const priorityItem = _.find(items, v=>v.name == defaults[depth])
+        if (priorityItem !== undefined) {
+            items = [priorityItem, ...items.filter(v => v !== priorityItem)]
+        }
     }
     for (const fi of items) {
         if (depth == 0 && fi.fstat.isFile() && fileFilter(fi)) {
             return fi;
         }
         if (depth > 0 && fi.fstat.isDirectory()) {
-            const res = await findNewestFileDeep(path.join(dir, fi.name), depth - 1, fileFilter);
+            const res = await findNewestFileDeep(path.join(dir, fi.name), depth - 1, fileFilter, defaults);
             if (res != null) {
                 return res;
             }
