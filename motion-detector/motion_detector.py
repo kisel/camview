@@ -27,6 +27,8 @@ def process_input(streamSrc, args, writer=None):
     too_many_objects = 0
     process_frames = 1
     fps = 0
+    motion_start_frames = []
+    motion_stop_frames = []
     if args.mask:
         mask = cv2.imread(args.mask, cv2.IMREAD_GRAYSCALE)
         mask = cv2.resize(mask, base_resolution)
@@ -75,8 +77,12 @@ def process_input(streamSrc, args, writer=None):
             too_many_objects += 1
             move_seq_len = 0
         elif len(moved_objects) > 0:
+            if move_seq_len == 0:
+                motion_start_frames.append(frameIdx)
             move_seq_len += 1
         else:
+            if move_seq_len > 0:
+                motion_stop_frames.append(frameIdx)
             move_seq_len = 0
 
         if move_seq_len > args.min_seq:
@@ -117,6 +123,8 @@ def process_input(streamSrc, args, writer=None):
             'duration': frameIdx / fps,
             'motion_seconds_longest': longest_move_seq / fps,
             'motion_seconds_total': motion_frames / fps,
+            'motion_start_frames': motion_start_frames,
+            'motion_stop_frames': motion_stop_frames,
             'too_many_objects': too_many_objects
             }
 
