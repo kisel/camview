@@ -9,6 +9,7 @@ import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 }
 import { apiFileGenWrapper } from './tmpfileproc';
 
 import tmp = require('tmp');
+import { readMetadataForFiles } from './metadata';
 tmp.setGracefulCleanup();
 
 const app = express();
@@ -53,9 +54,11 @@ router.get('/api/list/:camname/:date/:hour', apiWrapper<ListResponse>(async req 
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
-    const filenames = await getDirFilenames(path.join(current_config.storage, camname, date, hour), /.*[.]ts$/);
+    const baseDir = path.join(current_config.storage, camname, date, hour)
+    const filenames = await getDirFilenames(baseDir, /.*[.]ts$/);
     return {
-        items: filenames.map( fn => ({name: fn.replace(/[.]ts$/, '.mp4')}) as ListItem)
+        items: filenames.map( fn => ({name: fn.replace(/[.]ts$/, '.mp4')}) as ListItem),
+        metadata: await readMetadataForFiles([camname, date, hour], filenames)
     }
 }));
 

@@ -14,6 +14,8 @@ export interface ClientSettings {
 
     cam_columns?: number
     with_borders?: boolean
+    // show videos without any actions
+    show_all_video?: boolean
 }
 
 export const defaultSettings: ClientSettings = {

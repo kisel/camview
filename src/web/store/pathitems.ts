@@ -5,9 +5,10 @@ import { CtxGuard } from "../../server/utils";
 import { urljoin } from "../utils/urljoin";
 import { theLocation } from "./location";
 
+const emptyInfo = {items: [], metadata: []};
 class PathItemsStore {
     @observable currentPath: string[] = [];
-    @observable subItems: string[] = [];
+    @observable currentPathInfo: ListResponse = emptyInfo;
 }
 
 export const thePathItemsStore = new PathItemsStore();
@@ -16,7 +17,7 @@ autorun(async () => {
     const absLoc = theLocation.path.split('/').slice(2, -1); // strip /view/ and /$
     runInAction(()=>{
         thePathItemsStore.currentPath = absLoc;
-        thePathItemsStore.subItems = []
+        thePathItemsStore.currentPathInfo  = emptyInfo
     })
     const samePathGuard = new CtxGuard(() => theLocation.path)
 
@@ -27,7 +28,7 @@ autorun(async () => {
         .then(res => {
             runInAction(()=>{
                 if (samePathGuard.unchanged()) {
-                    thePathItemsStore.subItems = _.map(res.items, v => v.name)
+                    thePathItemsStore.currentPathInfo = res;
                 }
             })
         });

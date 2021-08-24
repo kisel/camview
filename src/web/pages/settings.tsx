@@ -71,6 +71,7 @@ export const SettingsPage = observer(() => {
         <form>
             <BoolSetting label="Enable legacy device support" name="legacy_mode"/>
             <BoolSetting label="Borders" name="with_borders"/>
+            <BoolSetting label="Show all video" name="show_all_video"/>
             <BoolSetting label="Native player" name="native_player"/>
             <DropdownSetting label="Cam columns" name="cam_columns" choices={[2, 3, 4, 6, 12]}/>
             <DropdownSetting label="Favorite time" name="favorite_time" choices={[0, 12, 15, 18, 22]}/>
