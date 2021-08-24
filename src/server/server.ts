@@ -4,7 +4,7 @@ import * as express from 'express';
 import {current_config} from './config'
 import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper } from './utils';
-import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, verifySafeFileName } from './fileutils';
+import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, isSafeFileName, verifySafeFileName } from './fileutils';
 import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
 
@@ -134,10 +134,11 @@ function tsFileFilter(fi: FileInfo) {
 
 const fullPathLen = ['camname', 'date', 'hour'].length;
 async function deepThumbHandler(req: express.Request, res: express.Response, paramKeys: string[], cacheTime?: number) {
-    const {resolution} = req.query as any;
+    const {resolution, favourite_time} = req.query as any;
     const relPath = paramKeys.map(k => verifySafeFileName(req.params[k]));
     const searchdir = path.join(current_config.storage, ...relPath);
-    const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter);
+    const searchdefaults = (favourite_time && isSafeFileName(favourite_time)) ? [undefined, favourite_time] : undefined
+    const fi = await findNewestFileDeep(searchdir, fullPathLen - paramKeys.length, tsFileFilter, searchdefaults);
     // console.log("found last:", fi.fullpath)
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {

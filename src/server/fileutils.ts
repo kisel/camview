@@ -67,12 +67,15 @@ function sortNewestFirst(a: FileInfo, b: FileInfo): number {
 
 type FileInfoFilter = (fi: FileInfo) => boolean;
 // find latest file at exact depth
-export async function findNewestFileDeep(dir: string, depth: number, fileFilter: FileInfoFilter): Promise<FileInfo> {
+export async function findNewestFileDeep(dir: string, depth: number, fileFilter: FileInfoFilter, defaults?: string[]): Promise<FileInfo> {
     if (depth < 0) {
         return null;
     }
     let items = await readDirStat(dir);
     items.sort(sortNewestFirst);
+    if (defaults && defaults[depth]) {
+        items.push(defaults['depth'])
+    }
     for (const fi of items) {
         if (depth == 0 && fi.fstat.isFile() && fileFilter(fi)) {
             return fi;

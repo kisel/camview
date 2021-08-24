@@ -40,7 +40,7 @@ export const CameraGrid = observer(() => {
                         <div className="card">
                             <a href={playerURL}>
                                 <img className="card-img-top"
-                                    src={urljoin('/api/image/', ...newPath, '/?resolution=thumbnail')}
+                                    src={urljoin('/api/image/', ...newPath, `/?resolution=thumbnail&favourite_time=${theSettings.favorite_time}`)}
                                     onClick={() => theLocation.change(playerURL)}
                                 />
                             </a>
