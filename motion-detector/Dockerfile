@@ -12,4 +12,5 @@ WORKDIR /app
 
 COPY motion_detector.py /app/
 COPY watch_and_process.sh /app/
+COPY ./motion_detector_watch.py /app/
 

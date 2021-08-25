@@ -89,7 +89,8 @@ def process_input(streamSrc, args, video_writer=None):
             motion_frames += 1
             longest_move_seq = max(longest_move_seq, move_seq_len)
 
-        write_screenshot = move_seq_len == 1 and len(motion_start_frames) < args.max_detections
+        # write screenshot on the 1st detected and highlighted movement(min_seq)
+        write_screenshot = args.image_out and move_seq_len == args.min_seq and len(motion_start_frames) < args.max_detections
         if args.gui or video_writer or write_screenshot:
             if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
@@ -108,8 +109,9 @@ def process_input(streamSrc, args, video_writer=None):
                 oframe = quad
             else:
                 oframe = frame
-            if write_screenshot:
+            if write_screenshot and args.image_out:
                 img_fn = args.image_out.format(detectidx=len(motion_start_frames))
+                log(f"output screenshot {img_fn}")
                 cv2.imwrite(img_fn, oframe)
             if video_writer is not None:
                 if not args.video_out_detect_only or move_seq_len > 0:
