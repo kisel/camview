@@ -23,10 +23,9 @@ def process_input(streamSrc, args, video_writer=None):
     minArea = 0
     move_seq_len = 0
     longest_move_seq = 0
-    motion_frames = 0
+    total_motion_frames = 0
     too_many_objects = 0
     process_frames = 1
-    fps = 0
     motion_start_frames = []
     motion_stop_frames = []
     if args.mask:
@@ -78,9 +77,9 @@ def process_input(streamSrc, args, video_writer=None):
             move_seq_len = 0
         elif len(moved_objects) > 0:
             # just started 'event recording'
+            move_seq_len += 1
             if move_seq_len == args.min_seq:
                 motion_start_frames.append(frameIdx)
-            move_seq_len += 1
         else:
             # continued event recording
             if move_seq_len > args.min_seq:
@@ -88,11 +87,11 @@ def process_input(streamSrc, args, video_writer=None):
             move_seq_len = 0
 
         if move_seq_len > args.min_seq:
-            motion_frames += 1
+            total_motion_frames += 1
             longest_move_seq = max(longest_move_seq, move_seq_len)
 
         # write screenshot on the 1st detected and highlighted movement(min_seq)
-        write_screenshot = args.image_out and move_seq_len == args.min_seq and len(motion_start_frames) < args.max_detections
+        write_screenshot = args.image_out and move_seq_len == args.min_seq and len(motion_start_frames) <= args.max_detections
         if args.gui or video_writer or write_screenshot:
             if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
@@ -130,7 +129,7 @@ def process_input(streamSrc, args, video_writer=None):
             'total_frames': frameIdx,
             'duration': frameIdx / fps,
             'motion_seconds_longest': longest_move_seq / fps,
-            'motion_seconds_total': motion_frames / fps,
+            'motion_seconds_total': total_motion_frames / fps,
             'motion_start_frames': motion_start_frames,
             'motion_stop_frames': motion_stop_frames,
             'too_many_objects': too_many_objects
@@ -150,8 +149,9 @@ def main():
     # it always makes sense to limit fps input to reasonable 5 / 10fps
     parser.add_argument('--dps', default=5, type=int,
             help='max detector ticks per second')
-    parser.add_argument('--max-detections', default=5, type=int,
-            help='limit number of detections')
+    # TODO: merge detections
+    parser.add_argument('--max-detections', default=3, type=int,
+            help='limit number of detections to output as images')
     parser.add_argument('-m', '--mask',
             help='binary mask file' )
     parser.add_argument('--image-out',
@@ -172,7 +172,7 @@ def main():
             help='ignore false detections of too many objects due cam reinit' )
     parser.add_argument('--threads', type=int,
             help='cv2.setNumThreads. 0 - no threads')
-    parser.add_argument('--min-seq', type=int, default=2,
+    parser.add_argument('--min-seq', type=int, default=3,
             help='minimal sequence of changed frames to capture movement' )
     parser.add_argument('input', nargs='+', help="file/rtsp stream")
     args=parser.parse_args()
