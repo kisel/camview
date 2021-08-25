@@ -3,13 +3,14 @@ import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
 import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
-import { apiError, apiWrapper, errorWrapper } from './utils';
+import { apiError, apiWrapper, errorWrapper, sendFileHelper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, isSafeFileName, verifySafeFileName } from './fileutils';
 import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
 
 import tmp = require('tmp');
 import { readMetadataForFiles } from './metadata';
+import { getDetectorThumbnailFile } from './detector_utils';
 tmp.setGracefulCleanup();
 
 const app = express();
@@ -117,16 +118,26 @@ function getStoragePathFromParams(req: express.Request, keys: string[]): string 
 }
 
 router.get('/api/image/:camname/:date/:hour/:basename.:ext/', errorWrapper(async (req, res) => {
-    const {resolution} = req.query as any;
+    const {resolution,detector} = req.query as any;
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
     const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
+    if (detector) {
+        const detectorThumbFn = await getDetectorThumbnailFile([camname, date, hour], basefn, detector)
+        if (detectorThumbFn) {
+            await sendFileHelper(req, res, detectorThumbFn)
+            return;
+        }
+    }
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.jpg`);
         await getVideoThumbnail(tsfile, tmpFile, resolution)
+        if (!detector) {
+            res.set('Cache-control', `public, max-age=${current_config.cache_time}`)
+        }
         return tmpFile;
     });
 }));

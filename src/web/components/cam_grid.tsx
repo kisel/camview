@@ -4,7 +4,7 @@ import {Row} from "react-bootstrap"
 import _ = require("lodash");
 import { theLocation } from "../store/location";
 import { thePathItemsStore } from "../store/pathitems";
-import { urljoin } from "../utils/urljoin";
+import { queryOptions, urljoin } from "../utils/urljoin";
 import { theSettings } from "../store/settings";
 import { firstMotionOffsetSec } from "../../common/detector_utils";
 
@@ -37,6 +37,7 @@ export const CameraGrid = observer(() => {
             {_.map(_.zip(currentPathInfo.items, currentPathInfo.metadata), ([item, itemMeta]) => {
                 const {name} = item;
                 const motionDuration = itemMeta?.detector?.motion_seconds_total || undefined
+                const hasMotion = !!motionDuration
                 const motionStart = firstMotionOffsetSec(itemMeta?.detector)
                 if ((itemMeta?.detector !== undefined) && (!show_all_video && !motionDuration)) {
                     // hide items with detector active, but no movements by default
@@ -44,18 +45,23 @@ export const CameraGrid = observer(() => {
                 }
                 const newPath = [...currentPath, name]
                 const playerURL = urljoin('/view/', ...newPath, '/');
+                const imgQueryOpts = queryOptions(
+                    'resolution=thumbnail',
+                    `def_hour=${favorite_time}`,
+                    hasMotion && 'detector=1',
+                )
                 return (
                     <div key={name} className={colsClassName}>
                         <div className="card">
                             <a href={playerURL}>
                                 <img className="card-img-top"
-                                    src={urljoin('/api/image/', ...newPath, `/?resolution=thumbnail&def_hour=${favorite_time}`)}
+                                    src={urljoin('/api/image/', ...newPath, `/?${imgQueryOpts}`)}
                                     onClick={() => theLocation.change(playerURL)}
                                 />
                             </a>
                             <div className="card-body camera-card">
                                 <span className="card-text">{beautify(name)}</span>
-                                {motionDuration && <span className="card-text">motion {Math.ceil(motionDuration)}s at {motionStart || '?'}</span>}
+                                {motionDuration && <span className="card-text">motion {Math.ceil(motionDuration)}s at {motionStart || '?'}s</span>}
                                 {currentPath.length == 0 && /* root camera choose grid */
                                     <span>
                                         {/* <img src={svg_clock}`)} /> */}
