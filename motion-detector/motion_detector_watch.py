@@ -15,9 +15,10 @@ def log(msg):
     print(msg)
 
 def main():
-    parser = argparse.ArgumentParser(description='Motion detector')
+    parser = argparse.ArgumentParser(description='Motion detector inotify watcher')
     parser.add_argument('--detector', default='./motion_detector.py')
     parser.add_argument('--detector-options', help='extra CLI args passed to detector like -E')
+    parser.add_argument('-f', '--filter', default=".*", help='filter by paths/filenames')
     parser.add_argument('-m', '--maskdir', help='directory with camera mask files')
     parser.add_argument('camdir', help="base cam directory with structure cam/dd-mm-hh/hh/*.mp4|ts")
     parser.add_argument('outdir', help="output directory, which repeats camdir structure")
@@ -26,6 +27,7 @@ def main():
     outdir = args.outdir
     maskdir = args.maskdir
     detector = args.detector
+    fileFilter = re.compile(args.filter)
 
     i = inotify.adapters.InotifyTree(camdir, mask=IN_CREATE)
 
@@ -34,6 +36,9 @@ def main():
         if not VIDEO_FILES.match(filename) or evt.mask != IN_CREATE:
             continue
         relpath = os.path.relpath(path, camdir)
+        if not fileFilter.search(f"{relpath}/{filename}"):
+            log('skipping {relpath}/{filename} as it doesnt match {args.filter}')
+            continue
         camname = relpath.split('/')[0]
         base_name = os.path.splitext(filename)[0]
         os.makedirs(os.path.join(outdir, relpath), exist_ok=True)
