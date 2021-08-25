@@ -77,11 +77,13 @@ def process_input(streamSrc, args, video_writer=None):
             too_many_objects += 1
             move_seq_len = 0
         elif len(moved_objects) > 0:
-            if move_seq_len == 0:
+            # just started 'event recording'
+            if move_seq_len == args.min_seq:
                 motion_start_frames.append(frameIdx)
             move_seq_len += 1
         else:
-            if move_seq_len > 0:
+            # continued event recording
+            if move_seq_len > args.min_seq:
                 motion_stop_frames.append(frameIdx)
             move_seq_len = 0
 
