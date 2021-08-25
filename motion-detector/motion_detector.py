@@ -12,7 +12,7 @@ GREEN = (0, 255, 0)
 log = lambda msg: None
 
 # fixed resolution for simplicity, and we need resize & some blur anyway
-base_resolution = [800, 600]
+base_resolution = [800, 450]
 
 def process_input(streamSrc, args, video_writer=None):
     ref_frame = None
