@@ -29,9 +29,11 @@ export function errorWrapper(handler: (req: express.Request, response: express.R
                 }
             })
             .catch(handlerErr => {
-                const status = Number.isInteger(handlerErr['status']) ? handlerErr['status'] : 403;
-                console.error('Unhandled error:', status, handlerErr);
-                res.status(status).json({error: errorToStr(handlerErr)});
+                if (!res.writableEnded) {
+                    const status = handlerErr && Number.isInteger(handlerErr['status']) ? handlerErr['status'] : 403;
+                    console.error('Unhandled error:', status, handlerErr);
+                    res.status(status).json({error: errorToStr(handlerErr)});
+                }
             });
     };
 }
@@ -47,4 +49,17 @@ export class CtxGuard {
     unchanged() {
         return this.ctx === JSON.stringify(this.ctxFunc())
     }
+}
+
+export function sendFileHelper(req: express.Request, response: express.Response, fileName: string) {
+    return new Promise<void>((resolve, reject) => {
+        response.sendFile(fileName, { acceptRanges: false }, (err) => {
+            if (err != null) {
+                console.log(`Unexpected error while sending file to ${req.url}`)
+                response.end();
+                resolve();
+            }
+            reject();
+        })
+    })
 }
