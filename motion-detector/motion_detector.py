@@ -14,7 +14,7 @@ log = lambda msg: None
 # fixed resolution for simplicity, and we need resize & some blur anyway
 base_resolution = [800, 600]
 
-def process_input(streamSrc, args, writer=None):
+def process_input(streamSrc, args, video_writer=None):
     ref_frame = None
     video = cv2.VideoCapture(streamSrc)
 
@@ -89,7 +89,8 @@ def process_input(streamSrc, args, writer=None):
             motion_frames += 1
             longest_move_seq = max(longest_move_seq, move_seq_len)
 
-        if args.gui or writer:
+        write_screenshot = move_seq_len == 1 and len(motion_start_frames) < args.max_detections
+        if args.gui or video_writer or write_screenshot:
             if move_seq_len >= args.min_seq:
                 for contour in moved_objects:
                     (x, y, w, h) = cv2.boundingRect(contour)
@@ -107,9 +108,12 @@ def process_input(streamSrc, args, writer=None):
                 oframe = quad
             else:
                 oframe = frame
-            if writer is not None:
+            if write_screenshot:
+                img_fn = args.image_out.format(detectidx=len(motion_start_frames))
+                cv2.imwrite(img_fn, oframe)
+            if video_writer is not None:
                 if not args.video_out_detect_only or move_seq_len > 0:
-                    writer.write(oframe)
+                    video_writer.write(oframe)
             if args.gui:
                 cv2.imshow("Output", oframe)
                 key = cv2.waitKey(int(1000.0 / args.fps))
@@ -142,8 +146,12 @@ def main():
     # it always makes sense to limit fps input to reasonable 5 / 10fps
     parser.add_argument('--dps', default=5, type=int,
             help='max detector ticks per second')
+    parser.add_argument('--max-detections', default=5, type=int,
+            help='limit number of detections')
     parser.add_argument('-m', '--mask',
             help='binary mask file' )
+    parser.add_argument('--image-out',
+            help='output image for each detection(first frame only). can contain {detectidx}')
     parser.add_argument('-O', '--video-out',
             help='output video with VideoWriter')
     parser.add_argument('-M', '--video-out-detect-only',
@@ -171,23 +179,24 @@ def main():
         global log
         log = lambda msg: print(msg)
     detector_results = []
-    writer = None
+    video_writer = None
     if args.video_out:
         fourcc = cv2.VideoWriter_fourcc(*args.video_out_codec)
         w, h = base_resolution
         if args.extra:
             # space for sidebar
             w = w + int(w/3)
-        writer = cv2.VideoWriter(args.video_out, fourcc, args.dps, [w, h])
+        log(f"output video file to {args.video_out}")
+        video_writer = cv2.VideoWriter(args.video_out, fourcc, args.dps, [w, h])
 
     for streamSrc in args.input:
         t1 = time.time()
-        res = process_input(streamSrc, args, writer=writer)
+        res = process_input(streamSrc, args, video_writer=video_writer)
         t2 = time.time()
         res['process_time'] = t2 - t1
         detector_results.append(res)
         log(json.dumps(res, indent=2))
-    if writer is not None:
+    if video_writer is not None:
         writer.release()
     if args.output:
         out = json.dumps({
@@ -200,6 +209,7 @@ def main():
         else:
             with open(args.output, 'w') as f:
                 f.write(out)
+            log(f"output json result to {args.output}")
 
 if __name__ == '__main__':
     main()
