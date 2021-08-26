@@ -68,13 +68,13 @@ def main():
             for filename in glob.iglob(glob_pattern, recursive=True):
                 process_file(args, os.path.dirname(filename), os.path.basename(filename))
 
-
-    i = inotify.adapters.InotifyTree(args.camdir, mask=IN_CREATE)
-    for event in i.event_gen(yield_nones=False):
-        (evt, type_names, path, filename) = event
-        if evt.mask != IN_CREATE: # likely not needed, but just in case
-            continue
-        process_file(args, path, filename)
+    if args.watch:
+        i = inotify.adapters.InotifyTree(args.camdir, mask=IN_CREATE)
+        for event in i.event_gen(yield_nones=False):
+            (evt, type_names, path, filename) = event
+            if evt.mask != IN_CREATE: # likely not needed, but just in case
+                continue
+            process_file(args, path, filename)
 
 if __name__ == '__main__':
     main()
