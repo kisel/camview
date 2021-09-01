@@ -11,7 +11,5 @@ RUN pip install inotify
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
-COPY motion_detector.py /app/
-COPY watch_and_process.sh /app/
-COPY ./motion_detector_watch.py /app/
+COPY *.py /app/
 
