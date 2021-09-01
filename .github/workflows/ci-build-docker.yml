@@ -35,7 +35,7 @@ jobs:
 
       - name: Log into registry
         run: echo "${{ secrets.DOCKER_AKISEL_RU_PASS }}" | docker login docker.akisel.ru -u github --password-stdin
-      - name: Push image
+      - name: Build & Push camview image
         run: |
           IMAGE_ID=docker.akisel.ru/camview
           # Strip git ref prefix from version
@@ -49,4 +49,18 @@ jobs:
           fi
           echo "Building image: $IMAGE_ID:$VERSION"
           docker buildx build --platform linux/amd64 --push --cache-to=$IMAGE_ID:cache --cache-from=$IMAGE_ID:cache -t $IMAGE_ID:$VERSION $COMMIT_TAG_OPTS .
+      - name: Build & Push motion-detector image
+        run: |
+          IMAGE_ID=docker.akisel.ru/motion-detector
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          if [ "$VERSION" == "master" ]; then
+            VERSION=latest
+            COMMIT_TAG_OPTS="-t $IMAGE_ID:master-$(git rev-parse --short HEAD)"
+          fi
+          echo "Building image: $IMAGE_ID:$VERSION"
+          docker buildx build --platform linux/amd64 --push --cache-to=$IMAGE_ID:cache --cache-from=$IMAGE_ID:cache -t $IMAGE_ID:$VERSION $COMMIT_TAG_OPTS motion-detector
 
