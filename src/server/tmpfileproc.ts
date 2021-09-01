@@ -18,7 +18,7 @@ export function apiFileGenWrapper(req: express.Request, res: express.Response, g
                 try {
                     const tmpFile = await gen(tmppath);
                     await new Promise<void>((resolve, _reject) => {
-                        res.sendFile(tmpFile, {acceptRanges: false}, (err) => {
+                        res.sendFile(tmpFile, (err) => {
                             if (err != null) {
                                 console.log(`Unexpected error while sending file ${tmpFile}`)
                                 res.end();
