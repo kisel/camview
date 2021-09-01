@@ -113,7 +113,7 @@ def process_input(streamSrc, args, video_writer=None):
             if write_screenshot and args.image_out:
                 img_fn = args.image_out.format(detectidx=len(motion_start_frames))
                 log(f"output screenshot {img_fn}")
-                cv2.imwrite(img_fn, oframe)
+                cv2.imwrite(img_fn, oframe, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
             if video_writer is not None:
                 if not args.video_out_detect_only or move_seq_len > 0:
                     video_writer.write(oframe)
