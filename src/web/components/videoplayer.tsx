@@ -1,17 +1,25 @@
 import * as React from 'react';
 import videojs, { VideoJsPlayerOptions } from 'video.js'
 import "video.js/dist/video-js.css"
+import "./videoplayer.css"
+import "./videojs_plugin"
+
+import { CamviewVideoJSPluginOptions } from './videojs_plugin';
 
 
+export interface CamviewPlayerOptions extends VideoJsPlayerOptions {
+  camview?: CamviewVideoJSPluginOptions
+}
 // see https://docs.videojs.com/tutorial-react.html
-export default class VideoPlayer extends React.Component<VideoJsPlayerOptions> {
+export default class VideoPlayer extends React.Component<CamviewPlayerOptions> {
   player: any;
   videoNode: any;
 
   componentDidMount() {
-    this.player = videojs(this.videoNode, this.props, () => {
+    this.player = videojs(this.videoNode, {...this.props, plugins: { camview: this.props.camview || {}}},() => {
       console.log('onPlayerReady', this)
     });
+
   }
 
   componentWillUnmount() {

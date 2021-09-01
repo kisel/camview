@@ -15,7 +15,7 @@ export const AppRouter = observer(() => {
     } else if (/^[/]view[/].*/.test(locPath)) {
           return <CameraGrid/>;
     } else if (/^[/]online[/].*/.test(locPath)) {
-          return <CameraRealtime/>;
+          return <CameraRealtime camId={theLocation.camId}/>;
     } else {
         return <div>Not found</div>
     }

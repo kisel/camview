@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import _ = require("lodash");
 import { theLocation } from "../store/location";
 import { theSettingsStore } from "../store/settings";
-import VideoPlayer from "../../common/videoplayer";
+import VideoPlayer from "./videoplayer";
 
 import "./player.css"
 
@@ -31,7 +31,11 @@ const CamVideoPlayerVideoJS = observer(() => {
             playbackRates: [1, 2, 5, 10, 20, 30],
             sources: [
                 { src: videoURL, type: 'video/mp4' }
-            ]
+            ],
+            camview: {
+                downloadUrl: videoURL
+            },
+
         }} />
     );
 });
@@ -52,9 +56,11 @@ const CamVideoPlayerLegacy = observer(() => {
     );
 });
 
-export const CameraRealtime = observer(() => {
-    const camid = theLocation.path.split('/')[2];
-    const videoURL = `/api/streams/data/${camid}/s.m3u8`
+export interface CameraRealtimeProps {
+    camId: string;
+}
+export const CameraRealtime = observer(({camId}: CameraRealtimeProps) => {
+    const videoURL = `/api/streams/data/${camId}/s.m3u8`
     return (
         <VideoPlayer {...{
             className: "video-container",

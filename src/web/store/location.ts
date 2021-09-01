@@ -1,4 +1,4 @@
-import {observable, action} from 'mobx';
+import {observable, action, computed} from 'mobx';
 import {createBrowserHistory} from 'history';
 import * as queryString from 'query-string';
 import * as _ from 'lodash';
@@ -19,6 +19,11 @@ class Location {
     @action.bound
     accept({pathname, hash}) {
         this.path =  pathname;
+    }
+
+    @computed
+    get camId() {
+        return this.path.split('/')[2];
     }
 
     change(path: string, params?: LocationParams) {
