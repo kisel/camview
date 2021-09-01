@@ -9,6 +9,7 @@ RUN apt update && \
 RUN pip install opencv-python-headless
 RUN pip install inotify
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
 
 COPY motion_detector.py /app/
 COPY watch_and_process.sh /app/
