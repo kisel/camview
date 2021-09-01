@@ -36,10 +36,11 @@ export const CameraGrid = observer(() => {
             <Row>
             {_.map(_.zip(currentPathInfo.items, currentPathInfo.metadata), ([item, itemMeta]) => {
                 const {name} = item;
-                const motionDuration = itemMeta?.detector?.motion_seconds_total || undefined
-                const hasMotion = !!motionDuration
+                const motionDuration = itemMeta?.detector?.motion_seconds_total || 0
+                console.log(motionDuration)
+                const hasMotion = motionDuration > 0
                 const motionStart = firstMotionOffsetSec(itemMeta?.detector)
-                if ((itemMeta?.detector !== undefined) && (!show_all_video && !motionDuration)) {
+                if ((itemMeta?.detector !== undefined) && (!show_all_video && motionDuration == 0)) {
                     // hide items with detector active, but no movements by default
                     return null;
                 }
@@ -61,7 +62,7 @@ export const CameraGrid = observer(() => {
                             </a>
                             <div className="card-body camera-card">
                                 <span className="card-text">{beautify(name)}</span>
-                                {motionDuration && <span className="card-text">motion {Math.ceil(motionDuration)}s at {motionStart || '?'}s</span>}
+                                {hasMotion && <span className="card-text">motion {Math.ceil(motionDuration)}s at {Math.round(motionStart)}s</span>}
                                 {currentPath.length == 0 && /* root camera choose grid */
                                     <span>
                                         {/* <img src={svg_clock}`)} /> */}
