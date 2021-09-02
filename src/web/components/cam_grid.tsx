@@ -7,6 +7,7 @@ import { thePathItemsStore } from "../store/pathitems";
 import { queryOptions, urljoin } from "../utils/urljoin";
 import { theSettings } from "../store/settings";
 import { firstMotionOffsetSec } from "../../common/detector_utils";
+const classNames = require("classnames")
 
 // const svg_clock = require("@fortawesome/fontawesome-free/svgs/solid/clock.svg")
 const svg_play = require("@fortawesome/fontawesome-free/svgs/solid/play-circle.svg")
@@ -29,6 +30,7 @@ export const CameraGrid = observer(() => {
     let {currentPath, currentPathInfo} = thePathItemsStore;
     const {favorite_time, show_all_video} = theSettings;
     const sz = Math.floor(12 / theSettings.cam_columns || 12)
+    const colsClassName = classNames("cam-grid", `col-lg-${sz}`)
     const colsClassName = `col-lg-${sz}`
     currentPath = thePathItemsStore.currentPath
     return (
@@ -60,7 +62,7 @@ export const CameraGrid = observer(() => {
                                     onClick={() => theLocation.change(playerURL)}
                                 />
                             </a>
-                            <div className="card-body camera-card">
+                            <div className="camera-card">
                                 <span className="card-text">{beautify(name)}</span>
                                 {hasMotion && <span className="card-text">motion {Math.ceil(motionDuration)}s at {Math.round(motionStart)}s</span>}
                                 {currentPath.length == 0 && /* root camera choose grid */

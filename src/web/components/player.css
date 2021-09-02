@@ -32,3 +32,14 @@
       width: 1em;
       height: 1em;
   }
+
+  .cam-grid .card {
+    height: 100%;
+  }
+
+  .cam-grid .card a {
+    min-height: 100px;
+    background: grey;
+    flex-grow: 1;
+    /* background-image: ; */
+  }
