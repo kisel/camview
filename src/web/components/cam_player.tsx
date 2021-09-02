@@ -75,8 +75,8 @@ export const CamVideoPlayer = observer(({videoURL}: {videoURL: string}) => {
         : <CamVideoPlayerVideoJS videoURL={videoURL} />
 })
 
-export const CamVideoPlayerPage = observer(() => {
-    const absLoc = theLocation.path.split('/').slice(2, -1); // strip /view/ and /$
+export const CamVideoPlayerPage = observer(({url}:{url: string}) => {
+    const absLoc = url.split('/').slice(2, -1); // strip /view/ and /$
     const videoPath = absLoc.join('/');
     const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
     const videoURL = `/api/video/${vformat}/${videoPath}`

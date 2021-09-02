@@ -10,3 +10,10 @@
 .camera-card * {
     margin: 0 0.5em;
 }
+
+html, body, #app {
+    height: 100%;
+}
+.camview-root {
+    min-height: 100vh;
+}

@@ -9,6 +9,7 @@ import { CamviewVideoJSPluginOptions } from './videojs_plugin';
 
 export interface CamviewPlayerOptions extends VideoJsPlayerOptions {
   camview?: CamviewVideoJSPluginOptions
+  className?: string;
 }
 // see https://docs.videojs.com/tutorial-react.html
 export default class VideoPlayer extends React.Component<CamviewPlayerOptions> {
@@ -33,7 +34,7 @@ export default class VideoPlayer extends React.Component<CamviewPlayerOptions> {
   // see https://github.com/videojs/video.js/pull/3856
   render() {
     return (
-      <div>
+      <div className={this.props.className}>
         <video ref={node => this.videoNode = node} className="video-js"></video>
       </div>
     )

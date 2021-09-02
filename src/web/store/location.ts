@@ -21,25 +21,6 @@ class Location {
         this.path =  pathname;
     }
 
-    @computed
-    get camId() {
-        return this.path.split('/')[2];
-    }
-
-    change(path: string, params?: LocationParams) {
-        if (path === this.path && _.isEqual(params, this.params)) {
-            return;
-        }
-        let targetPath = '/';
-        if (targetPath.endsWith('/')) {
-            targetPath = targetPath.substr(0, targetPath.length-1);
-        }
-        targetPath += path;
-        if (!_.isEmpty(params)) {
-            targetPath += '#' + queryString.stringify(params);
-        }
-        this.history.push(targetPath);
-    }
 }
 
 export const theLocation = new Location();

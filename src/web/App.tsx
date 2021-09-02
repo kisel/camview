@@ -6,16 +6,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import { observer } from 'mobx-react-lite';
-import { CamPathBreadbrumb } from './components/breadcrumb';
 import { AppRouter } from './pages/router';
 import { theSettings } from './store/settings';
-
+import { BrowserRouter as Router } from 'react-router-dom';
+// import * as ScrollMemory from 'react-router-scroll-memory';
 
 export const App = observer(() => (
-    <div className={theSettings.with_borders ? "container" : "container-fluid"}>
-        <CamPathBreadbrumb/>
+    <Router>
+        {/* <ScrollMemory /> */}
         <AppRouter/>
-    </div>
+    </Router>
 ));
 
 render(<App/>, document.getElementById('app'));

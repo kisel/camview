@@ -2,11 +2,12 @@ import React = require("react");
 import { observer } from "mobx-react-lite";
 import {Row} from "react-bootstrap"
 import _ = require("lodash");
-import { theLocation } from "../store/location";
-import { thePathItemsStore } from "../store/pathitems";
 import { queryOptions, urljoin } from "../utils/urljoin";
 import { theSettings } from "../store/settings";
 import { firstMotionOffsetSec } from "../../common/detector_utils";
+import { useHistory, useLocation } from "react-router-dom";
+import { Fetch } from "react-request";
+import { ListResponse } from "../../common/models";
 const classNames = require("classnames")
 
 // const svg_clock = require("@fortawesome/fontawesome-free/svgs/solid/clock.svg")
@@ -26,13 +27,15 @@ function beautify(label: string) {
     }
     return label;
 }
-export const CameraGrid = observer(() => {
-    let {currentPath, currentPathInfo} = thePathItemsStore;
+interface CameraGridProps {
+    currentPath: string[];
+    currentPathInfo: ListResponse;
+}
+export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridProps) => {
+    const history = useHistory();
     const {favorite_time, show_all_video} = theSettings;
     const sz = Math.floor(12 / theSettings.cam_columns || 12)
     const colsClassName = classNames("cam-grid", `col-lg-${sz}`)
-    const colsClassName = `col-lg-${sz}`
-    currentPath = thePathItemsStore.currentPath
     return (
         <div className="clickable-cards">
             <Row>
@@ -59,7 +62,6 @@ export const CameraGrid = observer(() => {
                             <a href={playerURL}>
                                 <img className="card-img-top"
                                     src={urljoin('/api/image/', ...newPath, `/?${imgQueryOpts}`)}
-                                    onClick={() => theLocation.change(playerURL)}
                                 />
                             </a>
                             <div className="camera-card">
@@ -69,7 +71,7 @@ export const CameraGrid = observer(() => {
                                     <span>
                                         {/* <img src={svg_clock}`)} /> */}
                                         <img src={svg_play} onClick={(e) => {
-                                            theLocation.change(`/online/${newPath[0]}`); e.stopPropagation();
+                                            history.push(`/online/${newPath[0]}`); e.stopPropagation();
                                         }} />
                                     </span>
                                 }
@@ -80,5 +82,29 @@ export const CameraGrid = observer(() => {
             })}
             </Row>
         </div>
+    );
+});
+
+export const CameraGridPage = observer(() => {
+    const location = useLocation();
+    const absLoc = location.pathname.split('/').slice(2, -1); // strip /view/ and /$
+    const infourl = urljoin('/api/list/', ...absLoc, '/');
+    // only request subitems if not displaying a file
+    return (
+        <Fetch url={infourl} children={({ fetching, failed, data }) => {
+            if (fetching) {
+                return <div>Loading...</div>;
+            }
+
+            if (failed) {
+                return <div>Whoops</div>;
+            }
+
+            if (data) {
+                return (
+                    <CameraGrid currentPath={absLoc} currentPathInfo={data}/>
+                );
+            }
+    }} />
     );
 });
