@@ -8,11 +8,7 @@ import VideoPlayer from "./videoplayer";
 
 import "./player.css"
 
-const CamVideoPlayerVideoJS = observer(() => {
-    const absLoc = theLocation.path.split('/').slice(2, -1); // strip /view/ and /$
-    const videoPath = absLoc.join('/');
-    const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
-    const videoURL = `/api/video/${vformat}/${videoPath}`
+const CamVideoPlayerVideoJS = observer(({videoURL}: {videoURL: string}) => {
     return (
         <VideoPlayer {...{
             className: "video-container",
@@ -41,11 +37,7 @@ const CamVideoPlayerVideoJS = observer(() => {
 });
 
 
-const CamVideoPlayerLegacy = observer(() => {
-    const absLoc = theLocation.path.split('/').slice(2, -1); // strip /view/ and /$
-    const videoPath = absLoc.join('/');
-    const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
-    const videoURL = `/api/video/${vformat}/${videoPath}`
+const CamVideoPlayerLegacy = observer(({videoURL}: {videoURL: string}) => {
     return (
         <div className="video-container">
             <video className="video-fluid" autoPlay controls width="100%">
@@ -77,8 +69,16 @@ export const CameraRealtime = observer(({camId}: CameraRealtimeProps) => {
     );
 });
 
-export const CamVideoPlayer = observer(() => {
+export const CamVideoPlayer = observer(({videoURL}: {videoURL: string}) => {
     return (theSettingsStore.settings.native_player)
-        ? <CamVideoPlayerLegacy/>
-        : <CamVideoPlayerVideoJS/>
+        ? <CamVideoPlayerLegacy  videoURL={videoURL} />
+        : <CamVideoPlayerVideoJS videoURL={videoURL} />
+})
+
+export const CamVideoPlayerPage = observer(() => {
+    const absLoc = theLocation.path.split('/').slice(2, -1); // strip /view/ and /$
+    const videoPath = absLoc.join('/');
+    const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
+    const videoURL = `/api/video/${vformat}/${videoPath}`
+    return <CamVideoPlayer videoURL={videoURL} />
 })
