@@ -82,7 +82,7 @@ def process_input(streamSrc, args, video_writer=None):
                 motion_start_frames.append(frameIdx)
         else:
             # continued event recording
-            if move_seq_len > args.min_seq:
+            if move_seq_len >= args.min_seq:
                 motion_stop_frames.append(frameIdx)
             move_seq_len = 0
 
