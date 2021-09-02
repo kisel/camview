@@ -14,27 +14,29 @@ export const AppRouter = observer(() => {
             <Route path="/multicam">
                 <RealtimeMultiCamPage />
             </Route>
-            <div className={theSettings.with_borders ? "container" : "container-fluid"}>
-                <CamPathBreadbrumb />
-                <Switch>
-                    <Route exact path="/view/">
-                        <ViewPage/>
-                    </Route>
-                    <Route path="/view/" children={({ location: { pathname: url } }) => {
-                        if (/^[/]view[/].*mp4[/]/.test(url)) {
-                            return <CamVideoPlayerPage url={url} />;
-                        } else if (/^[/]view[/].*/.test(url)) {
-                            return <CameraGridPage />;
-                        }
-                    }} />
-                    <Route path="/online/:camId" children={({ match: { params: { camId } } }) =>
-                        <CameraRealtime camId={camId} />
-                    } />
-                    <Route path="/">
-                        <Redirect to="/view/" />
-                    </Route>
-                </Switch>
-            </div>
+            <Route path="/">
+                <div className={theSettings.with_borders ? "container" : "container-fluid"}>
+                    <CamPathBreadbrumb />
+                    <Switch>
+                        <Route exact path="/view/">
+                            <ViewPage/>
+                        </Route>
+                        <Route path="/view/" children={({ location: { pathname: url } }) => {
+                            if (/^[/]view[/].*mp4[/]/.test(url)) {
+                                return <CamVideoPlayerPage url={url} />;
+                            } else if (/^[/]view[/].*/.test(url)) {
+                                return <CameraGridPage />;
+                            }
+                        }} />
+                        <Route path="/online/:camId" children={({ match: { params: { camId } } }) =>
+                            <CameraRealtime camId={camId} />
+                        } />
+                        <Route path="/">
+                            <Redirect to="/view/" />
+                        </Route>
+                    </Switch>
+                </div>
+            </Route>
         </Switch>
   );
 });
