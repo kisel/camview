@@ -2,7 +2,6 @@
 import React = require("react");
 import { observer } from "mobx-react-lite";
 import _ = require("lodash");
-import { theLocation } from "../store/location";
 import { theSettingsStore } from "../store/settings";
 import VideoPlayer from "./videoplayer";
 
