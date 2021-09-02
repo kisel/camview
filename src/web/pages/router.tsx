@@ -6,6 +6,7 @@ import {Switch, Route, Redirect} from "react-router-dom";
 import { RealtimeMultiCamPage } from "./multicam";
 import { CamPathBreadbrumb } from "../components/breadcrumb";
 import { theSettings } from "../store/settings";
+import { ViewPage } from "./view_page";
 
 export const AppRouter = observer(() => {
     return (
@@ -16,6 +17,9 @@ export const AppRouter = observer(() => {
             <div className={theSettings.with_borders ? "container" : "container-fluid"}>
                 <CamPathBreadbrumb />
                 <Switch>
+                    <Route exact path="/view/">
+                        <ViewPage/>
+                    </Route>
                     <Route path="/view/" children={({ location: { pathname: url } }) => {
                         if (/^[/]view[/].*mp4[/]/.test(url)) {
                             return <CamVideoPlayerPage url={url} />;

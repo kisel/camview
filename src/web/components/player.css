@@ -43,3 +43,7 @@
     flex-grow: 1;
     /* background-image: ; */
   }
+
+  .cam-grid .card-svg-icon a {
+    background: none;
+  }

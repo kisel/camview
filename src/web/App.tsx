@@ -7,7 +7,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import { observer } from 'mobx-react-lite';
 import { AppRouter } from './pages/router';
-import { theSettings } from './store/settings';
 import { BrowserRouter as Router } from 'react-router-dom';
 // import * as ScrollMemory from 'react-router-scroll-memory';
 
