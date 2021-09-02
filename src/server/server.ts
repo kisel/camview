@@ -11,9 +11,20 @@ import { apiFileGenWrapper } from './tmpfileproc';
 import tmp = require('tmp');
 import { readMetadataForFiles } from './metadata';
 import { getDetectorThumbnailFile } from './detector_utils';
+const promMid = require('express-prometheus-middleware');
+
 tmp.setGracefulCleanup();
 
 const app = express();
+
+app.use(promMid({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [0.1, 0.5, 1, 3, 5, 10],
+  requestLengthBuckets: [512, 1024, 5120, 10240, 51200, 102400],
+  responseLengthBuckets: [512, 1024, 5120, 10240, 51200, 102400],
+}));
+
 const router = express();
 
 router.get('/api/list/', apiWrapper<CamListResponse>(async req => {
