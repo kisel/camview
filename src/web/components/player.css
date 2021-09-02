@@ -28,6 +28,18 @@
     max-height: 80vh;
   }
 
+.video-container .red-marker {
+  background-color: red;
+  z-index: 1;
+}
+.video-container .blue-marker {
+  background-color: blue;
+  z-index: 2; /* draw blue on top of red markers as blue represents end of detection */
+}
+
+
+
+
   .camera-card img {
       width: 1em;
       height: 1em;

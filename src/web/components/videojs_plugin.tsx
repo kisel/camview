@@ -17,6 +17,7 @@ class DownloadButton extends vjsButton {
 export interface CamviewVideoJSPluginOptions {
     customClass?: string;
     downloadUrl?: string;
+    timelineMarkers?: any;
 }
 
 const Plugin = videojs.getPlugin('plugin');

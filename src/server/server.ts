@@ -9,7 +9,7 @@ import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 }
 import { apiFileGenWrapper } from './tmpfileproc';
 
 import tmp = require('tmp');
-import { readMetadataForFiles } from './metadata';
+import { readMetadataForFiles, readVideoMetadataFile } from './metadata';
 import { getDetectorThumbnailFile } from './detector_utils';
 const promMid = require('express-prometheus-middleware');
 
@@ -151,6 +151,14 @@ router.get('/api/image/:camname/:date/:hour/:basename.:ext/', errorWrapper(async
         }
         return tmpFile;
     });
+}));
+
+router.get('/api/detector/result/:camname/:date/:hour/:basename.:ext', apiWrapper(async (req) => {
+    const camname = verifySafeFileName(req.params.camname);
+    const date = verifySafeFileName(req.params.date);
+    const hour = verifySafeFileName(req.params.hour);
+    const basefn = verifySafeFileName(req.params.basename);
+    return readVideoMetadataFile(camname, date, hour, basefn)
 }));
 
 function tsFileFilter(fi: FileInfo) {

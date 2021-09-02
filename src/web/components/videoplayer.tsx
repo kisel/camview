@@ -1,6 +1,8 @@
 import * as React from 'react';
 import videojs, { VideoJsPlayerOptions } from 'video.js'
 import "video.js/dist/video-js.css"
+import "videojs-markers/dist/videojs.markers.min.css"
+import "videojs-markers/dist/videojs-markers.min.js"
 import "./videoplayer.css"
 import "./videojs_plugin"
 
@@ -19,7 +21,11 @@ export default class VideoPlayer extends React.Component<CamviewPlayerOptions> {
   componentDidMount() {
     this.player = videojs(this.videoNode, {...this.props, plugins: { camview: this.props.camview || {}}},() => {
       console.log('onPlayerReady', this)
+
     });
+    if (this.props.camview?.timelineMarkers && this.player.markers) {
+      this.player.markers(this.props.camview?.timelineMarkers);
+    }
 
   }
 

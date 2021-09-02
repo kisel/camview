@@ -13,6 +13,12 @@ async function readMetadataFile(filename: string): Promise<CamFileMetadata> {
         .catch(() => null);
 }
 
+export async function readVideoMetadataFile(camname:string, date: string, hour: string, basename): Promise<CamFileMetadata> {
+    const {cachedir} = current_config;
+    const metafn = path.join(cachedir, camname, date, hour, `${basename}.json`);
+    return readMetadataFile(metafn)
+}
+
 export async function readMetadataForFiles(relPath: string[], filenames: string[]): Promise<CamFileMetadata[]> {
     const {cachedir} = current_config;
     if (!cachedir || !_.every(relPath, isSafeFileName)) {
