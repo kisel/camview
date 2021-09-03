@@ -14,6 +14,15 @@ log = lambda msg: None
 # fixed resolution for simplicity, and we need resize & some blur anyway
 base_resolution = [800, 450]
 
+def dump_objects_to_dir(frameIdx, frame, moved_objects, outDir):
+    os.makedirs(outDir, exist_ok=True)
+    objIdx = 0
+    for contour in moved_objects:
+        objIdx += 1
+        (x, y, w, h) = cv2.boundingRect(contour)
+        ofn = os.path.join(outDir, f"f{frameIdx:05}_o{objIdx}.jpg")
+        cv2.imwrite(ofn, frame[y:y+h, x:x+w], [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
 def process_input(streamSrc, args, video_writer=None):
     ref_frame = None
     video = cv2.VideoCapture(streamSrc)
@@ -90,6 +99,14 @@ def process_input(streamSrc, args, video_writer=None):
             total_motion_frames += 1
             longest_move_seq = max(longest_move_seq, move_seq_len)
 
+
+        # take up to 1fps snapshots of each individual moved object for AI training
+        # and dump to out_dir if enabled(training source)
+        if move_seq_len > 0 and len(moved_objects) > 0 and args.out_objects:
+            if (move_seq_len - args.min_seq) % args.dps == 0: # take snapshot not more than once per second
+                out_objects_dir = os.path.join(args.out_objects, os.path.splitext(os.path.basename(streamSrc))[0], 'moved-objects')
+                dump_objects_to_dir(frameIdx, frame, moved_objects, out_objects_dir)
+
         # write screenshot on the 1st detected and highlighted movement(min_seq)
         write_screenshot = args.image_out and move_seq_len == args.min_seq and len(motion_start_frames) <= args.max_detections
         if args.gui or video_writer or write_screenshot:
@@ -97,6 +114,7 @@ def process_input(streamSrc, args, video_writer=None):
                 for contour in moved_objects:
                     (x, y, w, h) = cv2.boundingRect(contour)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 2)
+
             if args.extra:
                 h, w = frame.shape[:2]
                 sidebar = g2c(np.vstack((gray, delta_frame, thres_frame)))
@@ -156,6 +174,8 @@ def main():
             help='binary mask file' )
     parser.add_argument('--image-out',
             help='output image for each detection(first frame only). can contain {detectidx}')
+    parser.add_argument('--out-objects',
+            help='output dir for moved objects for further AI object recognition training.')
     parser.add_argument('-O', '--video-out',
             help='output video with VideoWriter')
     parser.add_argument('-M', '--video-out-detect-only',
@@ -167,7 +187,7 @@ def main():
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
             help='update reference frame each "r" frames' )
     parser.add_argument('-f', '--factor', type=int, default=1000,
-            help='area/factor - minimal area treated as change' )
+            help='area/factor - minimal area treated as change(default=1000)' )
     parser.add_argument('--max-groups', type=int, default=10,
             help='ignore false detections of too many objects due cam reinit' )
     parser.add_argument('--threads', type=int,
