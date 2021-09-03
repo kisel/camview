@@ -16,7 +16,7 @@ const svg_play = require("@fortawesome/fontawesome-free/svgs/solid/play-circle.s
 function beautify(label: string) {
 
     //cam-1244-1626973290.mp4
-    const mFN = label.match(/^cam-(\d\d)(\d\d)-\d{10}[.].*/)
+    const mFN = label.match(/^\w+-(\d\d)(\d\d)-\d{10}[.].*/)
     if (mFN) {
         return `${mFN[1]}:${mFN[2]}`
     }
