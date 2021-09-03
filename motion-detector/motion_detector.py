@@ -12,16 +12,22 @@ GREEN = (0, 255, 0)
 log = lambda msg: None
 
 # fixed resolution for simplicity, and we need resize & some blur anyway
+# [width, height] (16:9 source video expected)
 base_resolution = [800, 450]
 
-def dump_objects_to_dir(frameIdx, frame, moved_objects, outDir):
+def scale_rect(rect, rect_shape, dest_shape):
+    h1, w1 = rect_shape[:2]
+    h2, w2 = dest_shape[:2]
+    return np.int32(np.int32(rect) * [h2, w2, h2, w2] / [h1, w1, h1, w1])
+
+def dump_objects_to_dir(frameIdx, orig_frame, frame, moved_objects, outDir):
     os.makedirs(outDir, exist_ok=True)
     objIdx = 0
     for contour in moved_objects:
         objIdx += 1
-        (x, y, w, h) = cv2.boundingRect(contour)
+        (x, y, w, h) = scale_rect(cv2.boundingRect(contour), frame.shape, orig_frame.shape)
         ofn = os.path.join(outDir, f"f{frameIdx:05}_o{objIdx}.jpg")
-        cv2.imwrite(ofn, frame[y:y+h, x:x+w], [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        cv2.imwrite(ofn, orig_frame[y:y+h, x:x+w], [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
 def process_input(streamSrc, args, video_writer=None):
     ref_frame = None
@@ -51,6 +57,7 @@ def process_input(streamSrc, args, video_writer=None):
         frameIdx += 1
         if frameIdx % process_frames != 0:
             continue
+        orig_frame = frame
         frame = cv2.resize(frame, base_resolution)
         if frameIdx == 1:
             height, width = frame.shape[:2]
@@ -105,7 +112,7 @@ def process_input(streamSrc, args, video_writer=None):
         if move_seq_len > 0 and len(moved_objects) > 0 and args.out_objects:
             if (move_seq_len - args.min_seq) % args.dps == 0: # take snapshot not more than once per second
                 out_objects_dir = os.path.join(args.out_objects, os.path.splitext(os.path.basename(streamSrc))[0], 'moved-objects')
-                dump_objects_to_dir(frameIdx, frame, moved_objects, out_objects_dir)
+                dump_objects_to_dir(frameIdx, orig_frame, frame, moved_objects, out_objects_dir)
 
         # write screenshot on the 1st detected and highlighted movement(min_seq)
         write_screenshot = args.image_out and move_seq_len == args.min_seq and len(motion_start_frames) <= args.max_detections
