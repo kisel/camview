@@ -43,8 +43,8 @@ def process_file(args, path, filename):
     cli_args += ['-v']
     cli_args += ['-o', jsonoutfile]
     cli_args += ['--image-out', outfile_base + '.detector.{detectidx}.jpg']
-    if args.detector_options:
-        cli_args += [args.detector_options]
+    if args.options:
+        cli_args += args.options.split(' ')
     cli_args += [os.path.join(path, filename)]
     log(f"{camname}: {' '.join(cli_args)}")
     detector_proc = subprocess.run(cli_args)
@@ -53,7 +53,7 @@ def process_file(args, path, filename):
 def main():
     parser = argparse.ArgumentParser(description='Motion detector inotify watcher')
     parser.add_argument('--detector', default='./motion_detector.py')
-    parser.add_argument('--detector-options', help='extra CLI args passed to detector like -E')
+    parser.add_argument('--options', help='extra CLI args passed to detector like -E. separate multiple options with spaces')
     parser.add_argument('--watch', '-w', action='store_true', help="inotify watch on camdir")
     parser.add_argument('--redetect', nargs='*',
             help="find all files in camdir and run processing. accepts glob")
