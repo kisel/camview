@@ -39,7 +39,8 @@ const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers, startTime}: 
             camview: {
                 downloadUrl: videoURL,
                 timelineMarkers,
-                startTime
+                startTime,
+                showShare: "time"
             },
 
         }} />

@@ -20,16 +20,8 @@ export default class VideoPlayer extends React.Component<CamviewPlayerOptions> {
 
   componentDidMount() {
     const camview = this.props.camview || {};
-    this.player = videojs(this.videoNode, {...this.props, plugins: { camview: camview }}, () => {
-      // player ready
-      if (camview.startTime && this.player) {
-        this.player.currentTime(camview.startTime)
-      }
-    });
-    const markersPlugin = (this.player as any).markers //videojs-markers
-    if (camview.timelineMarkers && markersPlugin) {
-      markersPlugin(camview.timelineMarkers);
-    }
+    const markers = camview?.timelineMarkers;
+    this.player = videojs(this.videoNode, {...this.props, plugins: { camview, markers } } );
   }
 
   componentWillUnmount() {
