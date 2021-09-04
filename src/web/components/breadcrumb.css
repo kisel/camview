@@ -1,0 +1,25 @@
+
+@media all and (min-width: 992px) {
+    .navbar .nav-item .dropdown-menu{ display: none; }
+    .navbar .nav-item:hover .dropdown-menu{ display: block; }
+    .navbar .nav-item .dropdown-menu{
+        margin:0;
+        padding: 0;
+    }
+}
+
+.navbar .nav-item .dropdown-menu ul {
+    list-style-type: none;
+    white-space: nowrap;
+    padding: 1em;
+}
+
+
+.navbar .nav-item .dropdown-menu li:hover {
+    color:cornflowerblue;
+    font-weight:bold;
+}
+
+.navbar .nav-item .dropdown-menu ul.multicolumn {
+    column-count: 3;
+}
