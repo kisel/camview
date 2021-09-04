@@ -80,6 +80,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
                     </div>
                 )
             })}
+            {_.isEmpty(currentPathInfo.items) && "Nothing to display"}
             </Row>
         </div>
     );
