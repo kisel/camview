@@ -8,12 +8,15 @@ import VideoPlayer from "./videoplayer";
 import "./player.css"
 import { Fetch } from "react-request";
 import { CamFileMetadata } from "../../common/models";
+import { useLocation } from "react-router-dom";
+import { useQuery } from "../utils/router_utils";
 
 interface CamVideoPlayerProps {
     videoURL: string
     timelineMarkers?: any[];
+    startTime?: number;
 }
-const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers}: CamVideoPlayerProps) => {
+const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers, startTime}: CamVideoPlayerProps) => {
     return (
         <VideoPlayer {...{
             className: "video-container",
@@ -35,7 +38,8 @@ const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers}: CamVideoPla
             ],
             camview: {
                 downloadUrl: videoURL,
-                timelineMarkers
+                timelineMarkers,
+                startTime
             },
 
         }} />
@@ -82,10 +86,9 @@ export const CamVideoPlayer = observer((props: CamVideoPlayerProps) => {
         : <CamVideoPlayerVideoJS {...props} />
 })
 
-export const CamVideoPlayerPage = observer(({url}:{url: string}) => {
-    const absLoc = url.split('/').slice(2, -1); // strip /view/ and /$
-    const [camname, date, hour, fn] = absLoc;
-
+export const CamVideoPlayerComp = observer((props: {absLoc: string[], startTime?: number}) => {
+    const [camname, date, hour, fn] = props.absLoc;
+    
     const videoPath = [camname, date, hour, fn].join('/');
     const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
 
@@ -98,10 +101,23 @@ export const CamVideoPlayerPage = observer(({url}:{url: string}) => {
             }
             const detectorRes: CamFileMetadata = data;
             let timelineMarkers = buildVideoMarkers(detectorRes);
+            const playerProps = {
+                videoURL,
+                timelineMarkers,
+                startTime: props.startTime,
+            }
 
-            return <CamVideoPlayer videoURL={videoURL} timelineMarkers={timelineMarkers} />
+            return <CamVideoPlayer {...playerProps} />
     }} />
     );
+})
+
+export const CamVideoPlayerPage = observer(() => {
+    const loc = useLocation();
+
+    const absLoc = loc.pathname.split('/').slice(2, -1); // strip /view/ and /$
+    const startTime = parseFloat(useQuery().get('time')) || undefined;
+    return <CamVideoPlayerComp {...{absLoc, startTime}} />
 })
 
 function buildVideoMarkers(detectorRes: CamFileMetadata) {
@@ -127,4 +143,3 @@ function buildVideoMarkers(detectorRes: CamFileMetadata) {
     }
     return timelineMarkers;
 }
-

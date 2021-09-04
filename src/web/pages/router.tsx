@@ -23,7 +23,7 @@ export const AppRouter = observer(() => {
                         </Route>
                         <Route path="/view/" children={({ location: { pathname: url } }) => {
                             if (/^[/]view[/].*mp4[/]/.test(url)) {
-                                return <CamVideoPlayerPage url={url} />;
+                                return <CamVideoPlayerPage />;
                             } else if (/^[/]view[/].*/.test(url)) {
                                 return <CameraGridPage />;
                             }

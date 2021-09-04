@@ -18,6 +18,7 @@ export interface CamviewVideoJSPluginOptions {
     customClass?: string;
     downloadUrl?: string;
     timelineMarkers?: any;
+    startTime?: number;
 }
 
 const Plugin = videojs.getPlugin('plugin');
