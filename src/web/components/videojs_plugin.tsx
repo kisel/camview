@@ -45,6 +45,7 @@ export interface CamviewVideoJSPluginOptions {
     timelineMarkers?: any;
     startTime?: number;
     showShare?: string;
+    onVideoClick?: "toggle_fullscreen";
 }
 
 const Plugin = videojs.getPlugin('plugin');
@@ -70,6 +71,19 @@ class CamviewPlugin extends Plugin {
 
       if (options.startTime && this.player) {
         player.currentTime(options.startTime)
+      }
+
+      if (options.onVideoClick === "toggle_fullscreen") {
+        // https://github.com/videojs/video.js/issues/2444
+        // https://github.com/videojs/video.js/blob/ba47953851ff9d72efd87321c55cd4c51310da41/src/js/player.js#L1308
+        try {
+          const player_hack: any = player;
+          player.off(player_hack.tech_, 'mouseup', player_hack.handleTechClick_);
+          // emulate doubleclick to toggle fullscreen
+          player.on(player_hack, 'mouseup', player_hack.handleTechDoubleClick_);
+        } catch(e) {
+          console.log(e);
+        }
       }
 
       if (options.showShare === "time") {

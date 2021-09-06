@@ -7,25 +7,6 @@ import _ = require("lodash");
 import VideoPlayer from "../components/videoplayer";
 import "./../components/multicam.css"
 
-const CameraFeed = observer(({camId}: {camId: string}) => {
-    const videoURL = `/api/streams/data/${camId}/s.m3u8`
-    return (
-        <VideoPlayer muted {...{
-            className: "multicam-video-feed",
-            autoplay: true,
-            controls: true,
-            // responsive: true, //
-            errorDisplay: false,
-            preload: 'auto',
-            fill: true,
-            // html5: {},
-            sources: [
-                { src: videoURL, type: 'application/x-mpegURL' }
-            ]
-        }} />
-    );
-});
-
 const RealtimeMultiCam = observer(({items}: ListResponse) => {
     return (
         <div className="multicam-content container-fluid">
@@ -44,7 +25,10 @@ const RealtimeMultiCam = observer(({items}: ListResponse) => {
                             // html5: {},
                             sources: [
                                 { src: videoURL, type: 'application/x-mpegURL' }
-                            ]
+                            ],
+                            camview: {
+                                onVideoClick: "toggle_fullscreen"
+                            },
                         }} />
                 )
             })}

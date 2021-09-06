@@ -77,7 +77,10 @@ export const CameraRealtime = observer(({camId}: CameraRealtimeProps) => {
             // html5: {},
             sources: [
                 { src: videoURL, type: 'application/x-mpegURL' }
-            ]
+            ],
+            camview: {
+                onVideoClick: "toggle_fullscreen"
+            },
         }} />
     );
 });
