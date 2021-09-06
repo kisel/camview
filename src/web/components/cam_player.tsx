@@ -23,6 +23,7 @@ const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers, startTime}: 
             autoplay: true,
             controls: true,
             responsive: true, //
+            fill: true,
             //fluid: true, // scale to fit its container at the video's intrinsic aspect ratio
             preload: 'auto',
             html5: {
@@ -69,6 +70,7 @@ export const CameraRealtime = observer(({camId}: CameraRealtimeProps) => {
             className: "video-container",
             autoplay: true,
             controls: true,
+            fill: true,
             responsive: true, //
             errorDisplay: false,
             preload: 'auto',

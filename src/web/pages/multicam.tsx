@@ -2,12 +2,10 @@ import React = require("react");
 import { observer } from "mobx-react-lite";
 import { Fetch } from "react-request";
 import { ListResponse } from "../../common/models";
-import { Col, Container, Row } from "react-bootstrap";
+import { Row } from "react-bootstrap";
 import _ = require("lodash");
 import VideoPlayer from "../components/videoplayer";
 import "./../components/multicam.css"
-import { CamPathBreadbrumb } from "../components/breadcrumb";
-
 
 const CameraFeed = observer(({camId}: {camId: string}) => {
     const videoURL = `/api/streams/data/${camId}/s.m3u8`
@@ -30,9 +28,7 @@ const CameraFeed = observer(({camId}: {camId: string}) => {
 
 const RealtimeMultiCam = observer(({items}: ListResponse) => {
     return (
-        <div className="multicam-screen">
-            <CamPathBreadbrumb theme="dark"/>
-            <div className="multicam-content container-fluid">
+        <div className="multicam-content container-fluid">
             <Row>
             {_.map(items, ({name}) => {
                 const videoURL = `/api/streams/data/${name}/s.m3u8`
@@ -53,7 +49,6 @@ const RealtimeMultiCam = observer(({items}: ListResponse) => {
                 )
             })}
             </Row>
-            </div>
         </div>
     );
 });
@@ -74,6 +69,6 @@ export const RealtimeMultiCamPage = observer(() => {
                     <RealtimeMultiCam items={data.items}/>
                 );
             }
-    }} />
+        }} />
     );
 });

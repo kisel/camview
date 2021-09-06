@@ -1,0 +1,14 @@
+
+.fullvp {
+    /* height: 100vh; */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.fullvp .video-container {
+  flex: 1;
+  height: 0;
+  display: flex;
+}
