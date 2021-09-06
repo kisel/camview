@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
-import { ListResponse, ListItem, CameraDef, CamListResponse } from '../common/models';
+import { ListResponse, ListItem, CamMetadataResponse } from '../common/models';
 import { apiError, apiWrapper, errorWrapper, sendFileHelper } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, isSafeFileName, verifySafeFileName } from './fileutils';
 import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
@@ -34,23 +34,16 @@ app.get('/readyz', (_req, res) => {
 
 const router = express();
 
-router.get('/api/list/', apiWrapper<CamListResponse>(async req => {
+router.get('/api/list/', apiWrapper<ListResponse>(async req => {
     if (current_config.cameras != null && current_config.cameras.length > 0) {
         return { items: current_config.cameras }
     } else {
         const dirnames = await getSubdirNames(current_config.storage);
         return {
-            items: dirnames.map(dirname => ({ name: dirname }) as CameraDef)
+            items: dirnames.map(dirname => ({ name: dirname }))
         }
     }
 }));
-
-// router.get('/api/list/', apiWrapper<ListResponse>(async req => {
-//     const dirnames = await getSubdirNames(current_config.storage);
-//     return {
-//         items: dirnames.map( dirname => ({name: dirname}) as ListItem)
-//     }
-// }));
 
 router.get('/api/list/:camname', apiWrapper<ListResponse>(async req => {
     const camname = verifySafeFileName(req.params.camname);
@@ -79,6 +72,11 @@ router.get('/api/list/:camname/:date/:hour', apiWrapper<ListResponse>(async req 
         items: filenames.map( fn => ({name: fn.replace(/[.]ts$/, '.mp4')}) as ListItem),
         metadata: await readMetadataForFiles([camname, date, hour], filenames)
     }
+}));
+
+router.get('/api/camera/metadata', apiWrapper<CamMetadataResponse>(async req => {
+    const {camera_metadata} = current_config;
+    return {camera_metadata};
 }));
 
 router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour/:basename.mp4', errorWrapper(async (req, res) => {

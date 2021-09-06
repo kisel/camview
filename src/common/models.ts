@@ -8,14 +8,23 @@ export interface ListResponse {
     metadata?: CamFileMetadata[];
 }
 
-export interface CameraDef {
+export interface CamDef {
     name: string;
-    title?: string;
+}
+
+export interface CamMetadata {
+    label?: string;
     description?: string;
 }
 
+export type CamMetadataDict = {[k: string]: CamMetadata};
+
+export interface CamMetadataResponse {
+    camera_metadata: CamMetadataDict 
+}
+
 export interface CamListResponse {
-    items: CameraDef[];
+    items: CamDef[];
 }
 
 export interface CamFileMetadata {

@@ -1,0 +1,13 @@
+workdir: /tmp/camview-workdir
+streams: /tmp/streams
+storage: /mnt/video/cam
+cachedir: /mnt/video/cache
+debug: 5
+camera_metadata:
+  cam102:
+    label: "Frontal camera"
+    description: "some longer description"
+  cam125:
+    label: "Main camera"
+    description: ""
+

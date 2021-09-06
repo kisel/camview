@@ -9,6 +9,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { Fetch } from "react-request";
 import { ListResponse } from "../../common/models";
 import { beautify } from "../utils/cam_utils";
+import { theAppState } from "../store/state";
 const classNames = require("classnames")
 
 // const svg_clock = require("@fortawesome/fontawesome-free/svgs/solid/clock.svg")
@@ -23,6 +24,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
     const {favorite_time, show_all_video} = theSettings;
     const sz = Math.floor(12 / theSettings.cam_columns || 12)
     const colsClassName = classNames("cam-grid", `col-lg-${sz}`)
+    const {camMeta} = theAppState;
     const itemsToDisplay = _.map(_.zip(currentPathInfo.items, currentPathInfo.metadata), ([item, itemMeta]) => {
         const { name } = item;
         const motionDuration = itemMeta?.detector?.motion_seconds_total || 0
@@ -49,7 +51,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
                         />
                     </a>
                     <div className="camera-card">
-                        <span className="card-text">{beautify(name)}</span>
+                        <span className="card-text">{beautify(name, camMeta)}</span>
                         {hasMotion && <span className="card-text">motion {Math.ceil(motionDuration)}s at {Math.round(motionStart)}s</span>}
                         {currentPath.length == 0 && /* root camera choose grid */
                             <span>

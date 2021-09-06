@@ -52,10 +52,11 @@ export const LiveMainPath = observer(() => {
 
 export const LivePath = observer(({item}: {item: PathInfo}) => {
     const history = useHistory();
+    const {camMeta} = theAppState;
     return (
         <div className="nav-item dropdown">
             <a className="nav-link  dropdown-toggle" data-bs-toggle="dropdown" onClick={() => history.push(buildViewUrl(item.absPath))}>
-                {beautify(item.label)}
+                {beautify(item.label, camMeta)}
             </a>
             <Fetch url={_.join(['/api/list', ...item.absPath.slice(0, -1)], '/')} children={({ data }) => {
                 const items: ListItem[] = data?.items || [];
@@ -63,7 +64,7 @@ export const LivePath = observer(({item}: {item: PathInfo}) => {
                     <div className="dropdown-menu">
                         <ul className={classNames({multicolumn:_.size(items) > 10})}>
                         {_.map(items, (dropdownItem, idx) => (
-                            <li key={idx}><a onClick={() => history.push(buildUrl(item, dropdownItem))}>{beautify(dropdownItem.name)}</a></li>
+                            <li key={idx}><a onClick={() => history.push(buildUrl(item, dropdownItem))}>{beautify(dropdownItem.name, camMeta)}</a></li>
                         ))}
                         </ul>
                     </div>
