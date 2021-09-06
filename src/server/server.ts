@@ -25,6 +25,13 @@ app.use(promMid({
   responseLengthBuckets: [512, 1024, 5120, 10240, 51200, 102400],
 }));
 
+app.get('/healthz', (_req, res) => {
+    res.json({ok: true});
+});
+app.get('/readyz', (_req, res) => {
+    res.json({ok: true});
+});
+
 const router = express();
 
 router.get('/api/list/', apiWrapper<CamListResponse>(async req => {
