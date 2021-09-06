@@ -11,6 +11,9 @@ import time
 import inotify.adapters
 from inotify.constants import IN_CREATE
 VIDEO_FILES = re.compile(".*[.](ts|mp4)$")
+# normally there should be few new files per minute
+# but in case inotify is stuck - restart the watcher app
+WATCH_TIMEOUT_S = int(os.environ.get('WATCH_TIMEOUT_S', '300'))
 
 def log(msg):
     print(msg)
@@ -70,7 +73,7 @@ def main():
 
     if args.watch:
         i = inotify.adapters.InotifyTree(args.camdir, mask=IN_CREATE)
-        for event in i.event_gen(yield_nones=False):
+        for event in i.event_gen(yield_nones=False, timeout_s=WATCH_TIMEOUT_S):
             (evt, type_names, path, filename) = event
             if evt.mask != IN_CREATE: # likely not needed, but just in case
                 continue
