@@ -34,7 +34,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
             return null;
         }
         const newPath = [...currentPath, name]
-        const playerURL = urljoin('/view/', ...newPath, '/');
+        const playerURL = urljoin('/view/', ...newPath, motionStart ? `/?time=${motionStart}`: '/');
         const imgQueryOpts = queryOptions(
             'resolution=thumbnail',
             `def_hour=${favorite_time}`,
