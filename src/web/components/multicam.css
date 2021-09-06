@@ -7,3 +7,7 @@
 .multicam-content .row {
     width: 100%;
 }
+
+.multicam-content .row div {
+    padding: 1px;
+}
