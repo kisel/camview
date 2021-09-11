@@ -1,8 +1,8 @@
 import * as React from 'react';
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from 'video.js'
 import "video.js/dist/video-js.css"
-import "videojs-markers/dist/videojs.markers.min.css"
-import "videojs-markers/dist/videojs-markers.min.js"
+import "videojs-markers-plugin/dist/videojs.markers.min.css"
+import "videojs-markers-plugin/dist/videojs-markers.min.js"
 import "./videoplayer.css"
 import "./videojs_plugin"
 
