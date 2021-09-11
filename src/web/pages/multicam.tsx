@@ -4,7 +4,7 @@ import { Fetch } from "react-request";
 import { ListResponse } from "../../common/models";
 import { Row } from "react-bootstrap";
 import _ = require("lodash");
-import VideoPlayer from "../components/videoplayer";
+import { VideoPlayer } from "../components/videoplayer";
 import "./../components/multicam.css"
 
 const RealtimeMultiCam = observer(({items}: ListResponse) => {

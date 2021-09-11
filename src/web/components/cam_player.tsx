@@ -3,7 +3,7 @@ import React = require("react");
 import { observer } from "mobx-react-lite";
 import _ = require("lodash");
 import { theSettingsStore } from "../store/settings";
-import VideoPlayer from "./videoplayer";
+import {VideoPlayer} from "./videoplayer";
 
 import "./player.css"
 import { Fetch } from "react-request";
@@ -19,6 +19,7 @@ interface CamVideoPlayerProps {
 const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers, startTime}: CamVideoPlayerProps) => {
     return (
         <VideoPlayer {...{
+            key: videoURL, // remount when URL changes
             className: "video-container",
             autoplay: true,
             controls: true,
@@ -67,6 +68,7 @@ export const CameraRealtime = observer(({camId}: CameraRealtimeProps) => {
     const videoURL = `/api/streams/data/${camId}/s.m3u8`
     return (
         <VideoPlayer {...{
+            key: videoURL, // remount when URL changes
             className: "video-container",
             autoplay: true,
             controls: true,
@@ -101,7 +103,7 @@ export const CamVideoPlayerComp = observer((props: {absLoc: string[], startTime?
     const videoURL = ['/api/video', vformat, videoPath].join('/')
     const detectorURL = ['/api/detector/result', videoPath.replace(/[.](mp4|ts)/, '.json')].join('/');
     return (
-      <Fetch url={detectorURL} children={({ fetching, failed, data }) => {
+      <Fetch key={videoURL} url={detectorURL} children={({ fetching, failed, data }) => {
             if (fetching) {
                 return <div>Loading...</div>;
             }
