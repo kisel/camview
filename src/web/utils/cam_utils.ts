@@ -1,12 +1,23 @@
 import { CamMetadataDict } from "../../common/models";
 
+function fmtHHMM(label: string, rex: RegExp) {
+    const maHHMM = label.match(rex)
+    const {hh, mm} = maHHMM?.groups || {};
+    if (hh && mm) {
+        return `${hh}:${mm}`
+    }
+}
 // post-process some known labels
 export function beautify(label: string, camMeta: CamMetadataDict|undefined): string {
 
-    //cam-1244-1626973290.mp4
-    const mFN = label.match(/^\w+-(\d\d)(\d\d)-\d{10}[.].*/)
-    if (mFN) {
-        return `${mFN[1]}:${mFN[2]}`
+    let labelHHMM = (
+        // cam-1244-1626973290
+        fmtHHMM(label, /^\w+-(?<hh>\d\d)(?<mm>\d\d)-(?<epoch>\d{10})[.].*/) ||
+        // cam227-20210909-1501
+        fmtHHMM(label, /^[\w-]*-(?<hh>\d\d)(?<mm>\d\d)([.-].*|$)/)
+    );
+    if (labelHHMM) {
+        return labelHHMM;
     }
 
     const mHH = label.match(/^(\d\d)$/)
@@ -20,3 +31,4 @@ export function beautify(label: string, camMeta: CamMetadataDict|undefined): str
     }
     return label;
 }
+    
