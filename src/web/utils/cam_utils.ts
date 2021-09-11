@@ -31,3 +31,7 @@ export function beautify(label: string, camMeta: CamMetadataDict|undefined): str
     }
     return label;
 }
+
+export function applyCamLabelMap(label: string, camMeta: CamMetadataDict|undefined): string {
+    return camMeta[label]?.label || label;
+}

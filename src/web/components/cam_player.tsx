@@ -7,10 +7,12 @@ import {VideoPlayer} from "./videoplayer";
 
 import "./player.css"
 import { Fetch } from "react-request";
-import { CamFileMetadata } from "../../common/models";
+import { CamFileMetadata, ListResponse } from "../../common/models";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "../utils/router_utils";
 import { MarkersPluginOptions } from "./videojs_markers";
+import { urljoin } from "../utils/urljoin";
+import { camFilenameMatchingHHMM } from "../../common/cam_filenames";
 
 interface CamVideoPlayerProps {
     videoURL: string
@@ -95,9 +97,13 @@ export const CamVideoPlayer = observer((props: CamVideoPlayerProps) => {
         : <CamVideoPlayerVideoJS {...props} />
 })
 
-export const CamVideoPlayerComp = observer((props: {absLoc: string[], startTime?: number}) => {
+interface CamVideoPlayerCompProps {
+    absLoc: string[]
+    startTime?: number
+}
+
+export const CamVideoPlayerComp = observer((props: CamVideoPlayerCompProps) => {
     const [camname, date, hour, fn] = props.absLoc;
-    
     const videoPath = [camname, date, hour, fn].join('/');
     const vformat = (theSettingsStore.settings.legacy_mode) ? 'mp4-legacy' : 'mp4'
 
@@ -126,7 +132,36 @@ export const CamVideoPlayerPage = observer(() => {
 
     const absLoc = loc.pathname.split('/').slice(2, -1); // strip /view/ and /$
     const startTime = parseFloat(useQuery().get('time')) || undefined;
-    return <CamVideoPlayerComp {...{absLoc, startTime}} />
+    const [camname, date, hour, fn] = absLoc;
+    const childProps = { absLoc, startTime };
+
+    if (fn && fn.match(/^\d\d$/)) {
+        const parentPath = absLoc.slice(0, 3)
+        const parentListFilesUrl = urljoin('/api/list/', ...parentPath, '/');
+        return (
+            <Fetch url={parentListFilesUrl} children={({ failed, data }: {failed: boolean, data: ListResponse}) => {
+                if (failed) {
+                    return <div>Whoops</div>;
+                }
+                if (data == null) {
+                    return <div>Loading...</div>;
+                } else {
+                    const selHHMM = `${hour}${fn}`
+                    const selectedVideoItem = _.find(data.items, (v) => (camFilenameMatchingHHMM(v.name, selHHMM)));
+                    if (!selectedVideoItem) {
+                        return <div>Nothing to show...</div>;
+                    } else {
+                        return (
+                            <CamVideoPlayerComp {...{ ...childProps, absLoc: [...parentPath, selectedVideoItem.name]}} />
+                        );
+                    }
+                }
+
+            }} />
+        );
+    } else {
+        return <CamVideoPlayerComp {...childProps} />
+    }
 })
 
 function buildVideoMarkers(detectorRes: CamFileMetadata): MarkersPluginOptions {

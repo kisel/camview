@@ -8,7 +8,8 @@ import { theAppState } from "../store/state";
 import { urljoin } from "../utils/urljoin";
 import { SettingsMenu } from "./settings_menu";
 import "./breadcrumb.css"
-import { beautify } from "../utils/cam_utils";
+import { applyCamLabelMap, beautify } from "../utils/cam_utils";
+import { CamPath } from "../../common/cam_paths";
 const classNames = require("classnames")
 
 interface PathInfo {
@@ -56,7 +57,7 @@ export const LivePath = observer(({item}: {item: PathInfo}) => {
     return (
         <div className="nav-item dropdown">
             <a className="nav-link  dropdown-toggle" data-bs-toggle="dropdown" onClick={() => history.push(buildViewUrl(item.absPath))}>
-                {beautify(item.label, camMeta)}
+                {item.absPath.length == CamPath.CamName ? applyCamLabelMap(item.label, camMeta) : item.label}
             </a>
             <Fetch url={_.join(['/api/list', ...item.absPath.slice(0, -1)], '/')} children={({ data }) => {
                 const items: ListItem[] = data?.items || [];

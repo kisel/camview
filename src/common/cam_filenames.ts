@@ -26,3 +26,8 @@ export function camToLocalFilename(filename: string) {
     }
     return filename;
 }
+
+export function camFilenameMatchingHHMM(filename: string, hhmm: string): boolean {
+    const ma = filename.match(/^(?<prefix>\w+)-(?<hhmm>\d{4})-(?<epoch>\d{10})[.](?<ext>\w+)$/);
+    return (ma?.groups?.hhmm) === hhmm;
+}
