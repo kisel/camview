@@ -3,13 +3,14 @@ import { observer } from "mobx-react-lite";
 import React = require("react");
 import { Fetch } from "react-request";
 import { useHistory, useLocation } from "react-router-dom";
-import { ListItem } from "../../common/models";
+import { CamMetadataDict, ListItem } from "../../common/models";
 import { theAppState } from "../store/state";
 import { urljoin } from "../utils/urljoin";
 import { SettingsMenu } from "./settings_menu";
 import "./breadcrumb.css"
 import { applyCamLabelMap, beautify } from "../utils/cam_utils";
-import { CamPath } from "../../common/cam_paths";
+import { buildViewUrl, CamPathLen } from "../../common/cam_paths";
+import { camFilenameToMM } from "../../common/cam_filenames";
 const classNames = require("classnames")
 
 interface PathInfo {
@@ -17,10 +18,6 @@ interface PathInfo {
     absPath: string[]
     currentPath: string[]
 }
-function buildViewUrl(path: string[]) {
-    return _.join(['/view', ...path], '/') + '/';
-}
-
 // replace corresponding part of path
 function buildUrl(item: PathInfo, dropdownItem: ListItem) {
     const pos = item.absPath.length;
@@ -57,7 +54,7 @@ export const LivePath = observer(({item}: {item: PathInfo}) => {
     return (
         <div className="nav-item dropdown">
             <a className="nav-link  dropdown-toggle" data-bs-toggle="dropdown" onClick={() => history.push(buildViewUrl(item.absPath))}>
-                {item.absPath.length == CamPath.CamName ? applyCamLabelMap(item.label, camMeta) : item.label}
+                {breadcrumbLabelFmt(item, camMeta)}
             </a>
             <Fetch url={_.join(['/api/list', ...item.absPath.slice(0, -1)], '/')} children={({ data }) => {
                 const items: ListItem[] = data?.items || [];
@@ -121,4 +118,20 @@ export const CamPathBreadbrumb = observer((props: {theme?: "light"|"dark"}) => {
         </nav>
     );
 });
+
+function breadcrumbLabelFmt({absPath, label}: PathInfo, camMeta: CamMetadataDict): React.ReactNode {
+    switch(absPath.length) {
+        case CamPathLen.CamName:
+            return applyCamLabelMap(label, camMeta);
+        case CamPathLen.Hour:
+            return `${label}:--`;
+        case CamPathLen.Video:
+            if (label.match(/^\d\d$/)) {
+                const [hh, mm] = absPath.slice(-2)
+                return `${hh}:${mm}`;
+            }
+            return beautify(label, camMeta);
+    }
+    return label
+}
 

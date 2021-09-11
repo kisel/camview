@@ -31,3 +31,9 @@ export function camFilenameMatchingHHMM(filename: string, hhmm: string): boolean
     const ma = filename.match(/^(?<prefix>\w+)-(?<hhmm>\d{4})-(?<epoch>\d{10})[.](?<ext>\w+)$/);
     return (ma?.groups?.hhmm) === hhmm;
 }
+
+// returns mm(minites) from cam filename
+export function camFilenameToMM(filename: string) {
+    const ma = filename.match(/^(?<prefix>\w+)-\d\d(?<mm>\d{2})-(?<epoch>\d{10})[.](?<ext>\w+)$/);
+    return ma?.groups?.mm;
+}

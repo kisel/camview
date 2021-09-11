@@ -11,6 +11,7 @@ import { ListResponse } from "../../common/models";
 import { beautify } from "../utils/cam_utils";
 import { theAppState } from "../store/state";
 import { camToLocalFilename } from "../../common/cam_filenames";
+import { buildViewUrl } from "../../common/cam_paths";
 const classNames = require("classnames")
 
 // const svg_clock = require("@fortawesome/fontawesome-free/svgs/solid/clock.svg")
@@ -36,7 +37,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
             return null;
         }
         const newPath = [...currentPath, name]
-        const playerURL = urljoin('/view/', ...newPath, motionStart ? `/?time=${motionStart}`: '/');
+        const playerURL = urljoin(buildViewUrl(newPath), motionStart ? `/?time=${motionStart}`: '/');
         const imgQueryOpts = queryOptions(
             'resolution=thumbnail',
             `def_hour=${favorite_time}`,
@@ -77,23 +78,6 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
         </div>
     );
 });
-
-// true if path points to directory with video files
-// 3 of 4 components specified: camname, date, hour | filename
-function isVideoParentPath(absLoc: string[]) {
-    return _.size(absLoc) == 3;
-}
-function toPrettyCameraPaths(absLoc: string[], listres: ListResponse) {
-    if (isVideoParentPath(absLoc)) {
-        return ({
-            ...listres,
-            items: _.map(listres.items, (v) => (
-                {...v, name: camToLocalFilename(v.name) }
-            ))
-        });
-    }
-    return listres;
-}
 
 export const CameraGridPage = observer(() => {
     const location = useLocation();
