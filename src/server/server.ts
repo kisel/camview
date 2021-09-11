@@ -11,6 +11,8 @@ import { apiFileGenWrapper } from './tmpfileproc';
 import tmp = require('tmp');
 import { readMetadataForFiles, readVideoMetadataFile } from './metadata';
 import { getDetectorThumbnailFile } from './detector_utils';
+import { logger } from '../common/logger';
+import { selectVideoSourceByName } from './video_source';
 const promMid = require('express-prometheus-middleware');
 
 tmp.setGracefulCleanup();
@@ -85,14 +87,15 @@ router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour/:basename.m
     const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
     const {vformat} = req.params;
-    const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
+    const parentDir = path.join(current_config.storage, camname, date, hour);
+    const selectedFile = await selectVideoSourceByName(parentDir, basefn, camname);
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.mp4`);
         if (vformat == "mp4-legacy") {
-            await reencodeToMp4H264(tsfile, tmpFile)
+            await reencodeToMp4H264(selectedFile, tmpFile)
         } else if (vformat == "mp4") {
-            await convertToMp4(tsfile, tmpFile)
+            await convertToMp4(selectedFile, tmpFile)
         } else {
             console.log(`Incorrect request: ${req.url}`)
         }
@@ -125,7 +128,6 @@ router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour.mp4', error
         return tmpFile;
     });
 }));
-
 
 function getStoragePathFromParams(req: express.Request, keys: string[]): string {
     const paramPath = keys.map(k => verifySafeFileName(req.params[k]));

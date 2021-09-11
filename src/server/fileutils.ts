@@ -25,7 +25,7 @@ async function readDirNames(dir: string, filter: NameStatFilter): Promise<string
         const fullpath = path.join(dir, fn);
         try {
             const fstat = await fse.stat(fullpath);
-            if (filter(fullpath, fstat)) {
+            if (filter(fn, fstat)) {
                 names.push(fn);
             }
         } catch(e) {
@@ -35,12 +35,14 @@ async function readDirNames(dir: string, filter: NameStatFilter): Promise<string
     return names;
 }
 
+/** returns a list of directory names inside dir */
 export async function getSubdirNames(dir: string): Promise<string[]> {
-    return readDirNames(dir, (_fullpath, fstat) => fstat.isDirectory());
+    return readDirNames(dir, (_fname, fstat) => fstat.isDirectory());
 }
 
+/** returns a list of filenames inside dir */
 export async function getDirFilenames(dir: string, file_regexp: RegExp): Promise<string[]> {
-    return readDirNames(dir, (fullpath, fstat) => file_regexp.test(fullpath) && fstat.isFile());
+    return readDirNames(dir, (fname, fstat) => file_regexp.test(fname) && fstat.isFile());
 }
 
 export interface FileInfo {
