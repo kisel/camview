@@ -1,12 +1,13 @@
 import * as React from 'react';
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from 'video.js'
 import "video.js/dist/video-js.css"
-import "videojs-markers-plugin/dist/videojs.markers.min.css"
-import "videojs-markers-plugin/dist/videojs-markers.min.js"
+import "videojs-markers-plugin/dist/videojs.markers.plugin.min.css"
+import "videojs-markers-plugin/dist/videojs-markers-plugin.js"
 import "./videoplayer.css"
 import "./videojs_plugin"
 
 import { CamviewVideoJSPluginOptions } from './videojs_plugin';
+import { withMarkers } from './videojs_markers';
 
 
 export interface CamviewPlayerOptions extends VideoJsPlayerOptions {
@@ -15,9 +16,10 @@ export interface CamviewPlayerOptions extends VideoJsPlayerOptions {
 }
 
 export const VideoPlayer = ( props: CamviewPlayerOptions) => {
-  const videoRef = React.useRef(null);
-  const playerRef = React.useRef(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const playerRef = React.useRef<VideoJsPlayer>(null);
 
+  // TODO: pass as plugins
   const camview = props.camview || {};
   const markers = camview?.timelineMarkers;
   const options = { ...props, plugins: { camview, markers } };

@@ -1,5 +1,6 @@
 import videojs, { VideoJsPlayer, VideoJsPlayerOptions } from 'video.js'
 import { downloadFile } from '../utils/download_utils';
+import { Marker, MarkersPluginOptions } from './videojs_markers';
 
 const vjsButton = videojs.getComponent('Button');
 
@@ -42,7 +43,7 @@ class ShareButton extends vjsButton {
 export interface CamviewVideoJSPluginOptions {
     customClass?: string;
     downloadUrl?: string;
-    timelineMarkers?: any;
+    timelineMarkers?: MarkersPluginOptions;
     startTime?: number;
     showShare?: string;
     onVideoClick?: "toggle_fullscreen";

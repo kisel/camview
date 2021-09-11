@@ -10,10 +10,11 @@ import { Fetch } from "react-request";
 import { CamFileMetadata } from "../../common/models";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "../utils/router_utils";
+import { MarkersPluginOptions } from "./videojs_markers";
 
 interface CamVideoPlayerProps {
     videoURL: string
-    timelineMarkers?: any[];
+    timelineMarkers?: MarkersPluginOptions
     startTime?: number;
 }
 const CamVideoPlayerVideoJS = observer(({videoURL, timelineMarkers, startTime}: CamVideoPlayerProps) => {
@@ -128,7 +129,7 @@ export const CamVideoPlayerPage = observer(() => {
     return <CamVideoPlayerComp {...{absLoc, startTime}} />
 })
 
-function buildVideoMarkers(detectorRes: CamFileMetadata) {
+function buildVideoMarkers(detectorRes: CamFileMetadata): MarkersPluginOptions {
     let timelineMarkers = undefined;
     if (detectorRes && detectorRes.detector) {
         const { fps, motion_start_frames, motion_stop_frames } = detectorRes.detector;
