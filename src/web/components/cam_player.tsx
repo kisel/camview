@@ -104,7 +104,7 @@ export const CamVideoPlayerComp = observer((props: {absLoc: string[], startTime?
     const detectorURL = ['/api/detector/result', videoPath.replace(/[.](mp4|ts)/, '.json')].join('/');
     return (
       <Fetch key={videoURL} url={detectorURL} children={({ fetching, failed, data }) => {
-            if (fetching) {
+            if (fetching || (!failed && data === null)) {
                 return <div>Loading...</div>;
             }
             const detectorRes: CamFileMetadata = data;
