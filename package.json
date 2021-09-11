@@ -7,10 +7,11 @@
     "server-dev": "nodemon -e ts -d 3 --exitcrash -w 'src/server' -w 'src/common' --exec node -r ts-node/register src/server/server.ts",
     "server": "node -r ts-node/register src/server/server.ts",
     "build": "webpack --mode=production",
-    "test": "true"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.10",
+    "@types/jest": "^27.0.1",
     "@types/multistream": "^2.1.1",
     "@types/query-string": "^6.3.0",
     "@types/react": "^16.9.49",
@@ -28,6 +29,7 @@
     "file-loader": "^6.1.0",
     "history": "^5.0.0",
     "html-webpack-plugin": "^4.5.0",
+    "jest": "^27.1.1",
     "keycloak-js": "^11.0.2",
     "mini-css-extract-plugin": "^0.11.2",
     "mobx": "^5.15.7",
@@ -54,6 +56,8 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-typescript": "^7.15.0",
     "@fortawesome/fontawesome-free": "^5.14.0",
     "@types/body-parser": "^1.19.0",
     "@types/compression": "^1.7.0",
