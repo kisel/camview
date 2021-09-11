@@ -110,8 +110,8 @@ export const CamVideoPlayerComp = observer((props: CamVideoPlayerCompProps) => {
     const videoURL = ['/api/video', vformat, videoPath].join('/')
     const detectorURL = ['/api/detector/result', videoPath.replace(/[.](mp4|ts)/, '.json')].join('/');
     return (
-      <Fetch key={videoURL} url={detectorURL} children={({ fetching, failed, data }) => {
-            if (fetching || (!failed && data === null)) {
+      <Fetch key={videoURL} url={detectorURL} children={({ data, response }) => {
+            if (response === null) {
                 return <div>Loading...</div>;
             }
             const detectorRes: CamFileMetadata = data;
@@ -139,11 +139,11 @@ export const CamVideoPlayerPage = observer(() => {
         const parentPath = absLoc.slice(0, 3)
         const parentListFilesUrl = urljoin('/api/list/', ...parentPath, '/');
         return (
-            <Fetch url={parentListFilesUrl} children={({ failed, data }: {failed: boolean, data: ListResponse}) => {
+            <Fetch url={parentListFilesUrl} children={({ failed, data }: {failed: boolean, data: ListResponse, response}) => {
                 if (failed) {
                     return <div>Whoops</div>;
                 }
-                if (data == null) {
+                if (response === null) {
                     return <div>Loading...</div>;
                 } else {
                     const selHHMM = `${hour}${fn}`
