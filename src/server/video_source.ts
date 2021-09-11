@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { logger } from "../common/logger";
-import { getDirFilenames } from "./fileutils";
+import { current_config } from './config';
+import { getDirFilenames, verifySafeFileName } from "./fileutils";
 
 export async function selectVideoSourceByName(parentDir: string, basefn: string, camname: string) {
     let selectedFile = path.join(parentDir, `${basefn}.ts`);
@@ -25,5 +26,18 @@ export async function selectVideoSourceByName(parentDir: string, basefn: string,
             }
         }
     }
+    return selectedFile;
+}
+
+// runction assumes input received from user and has to be checked
+// basefn - filename with no file extension
+export async function selectVideoSourceByClientInput(camname: string, date: string, hour: string, basename: string) {
+    const basefn = verifySafeFileName(basename);
+    const parentDir = path.join(current_config.storage,
+        verifySafeFileName(camname),
+        verifySafeFileName(date),
+        verifySafeFileName(hour)
+    );
+    const selectedFile = await selectVideoSourceByName(parentDir, basefn, camname);
     return selectedFile;
 }

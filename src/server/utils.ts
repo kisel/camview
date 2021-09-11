@@ -50,3 +50,7 @@ export function sendFileHelper(req: express.Request, response: express.Response,
         })
     })
 }
+
+export function sendNotFound(response: express.Response) {
+    response.status(404).json({error: "Not found"});
+}

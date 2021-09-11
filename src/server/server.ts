@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
 import { ListResponse, ListItem, CamMetadataResponse } from '../common/models';
-import { apiError, apiWrapper, errorWrapper, sendFileHelper } from './utils';
+import { apiError, apiWrapper, errorWrapper, sendFileHelper, sendNotFound } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, isSafeFileName, verifySafeFileName } from './fileutils';
 import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
@@ -12,7 +12,7 @@ import tmp = require('tmp');
 import { readMetadataForFiles, readVideoMetadataFile } from './metadata';
 import { getDetectorThumbnailFile } from './detector_utils';
 import { logger } from '../common/logger';
-import { selectVideoSourceByName } from './video_source';
+import { selectVideoSourceByClientInput, selectVideoSourceByName } from './video_source';
 const promMid = require('express-prometheus-middleware');
 
 tmp.setGracefulCleanup();
@@ -82,13 +82,14 @@ router.get('/api/camera/metadata', apiWrapper<CamMetadataResponse>(async req => 
 }));
 
 router.get('/api/video/:vformat(mp4|mp4-legacy)/:camname/:date/:hour/:basename.mp4', errorWrapper(async (req, res) => {
-    const camname = verifySafeFileName(req.params.camname);
-    const date = verifySafeFileName(req.params.date);
-    const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
     const {vformat} = req.params;
-    const parentDir = path.join(current_config.storage, camname, date, hour);
-    const selectedFile = await selectVideoSourceByName(parentDir, basefn, camname);
+    const selectedFile = await selectVideoSourceByClientInput(
+        req.params.camname,
+        req.params.date,
+        req.params.hour,
+        req.params.basename
+    );
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.mp4`);
@@ -134,16 +135,26 @@ function getStoragePathFromParams(req: express.Request, keys: string[]): string 
     const resPath = path.join(current_config.storage, ...paramPath);
     return resPath;
 }
-
 router.get('/api/image/:camname/:date/:hour/:basename.:ext/', errorWrapper(async (req, res) => {
     const {resolution,detector} = req.query as any;
     const camname = verifySafeFileName(req.params.camname);
     const date = verifySafeFileName(req.params.date);
     const hour = verifySafeFileName(req.params.hour);
     const basefn = verifySafeFileName(req.params.basename);
-    const tsfile = path.join(current_config.storage, camname, date, hour, `${basefn}.ts`);
+    const selectedVideoFile = await selectVideoSourceByClientInput(
+        req.params.camname,
+        req.params.date,
+        req.params.hour,
+        req.params.basename
+    );
+    if (!selectedVideoFile) {
+        sendNotFound(res);
+        return;
+    }
+    const selectedVideoVileBasename = verifySafeFileName(path.basename(selectedVideoFile).replace(/[.](mp4|ts)$/, ''));
+
     if (detector) {
-        const detectorThumbFn = await getDetectorThumbnailFile([camname, date, hour], basefn, detector)
+        const detectorThumbFn = await getDetectorThumbnailFile([camname, date, hour], selectedVideoVileBasename, detector)
         if (detectorThumbFn) {
             await sendFileHelper(req, res, detectorThumbFn)
             return;
@@ -152,7 +163,7 @@ router.get('/api/image/:camname/:date/:hour/:basename.:ext/', errorWrapper(async
 
     await apiFileGenWrapper(req, res, async (tmpDir)=> {
         const tmpFile = path.join(tmpDir, `${basefn}.jpg`);
-        await getVideoThumbnail(tsfile, tmpFile, resolution)
+        await getVideoThumbnail(selectedVideoFile, tmpFile, resolution)
         if (!detector) {
             res.set('Cache-control', `public, max-age=${current_config.cache_time}`)
         }
