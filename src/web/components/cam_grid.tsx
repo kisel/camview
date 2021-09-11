@@ -10,6 +10,7 @@ import { Fetch } from "react-request";
 import { ListResponse } from "../../common/models";
 import { beautify } from "../utils/cam_utils";
 import { theAppState } from "../store/state";
+import { camToLocalFilename } from "../../common/cam_filenames";
 const classNames = require("classnames")
 
 // const svg_clock = require("@fortawesome/fontawesome-free/svgs/solid/clock.svg")
@@ -28,7 +29,6 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
     const itemsToDisplay = _.map(_.zip(currentPathInfo.items, currentPathInfo.metadata), ([item, itemMeta]) => {
         const { name } = item;
         const motionDuration = itemMeta?.detector?.motion_seconds_total || 0
-        console.log(motionDuration)
         const hasMotion = motionDuration > 0
         const motionStart = firstMotionOffsetSec(itemMeta?.detector)
         if ((itemMeta?.detector !== undefined) && (!show_all_video && motionDuration == 0)) {
@@ -77,6 +77,23 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
         </div>
     );
 });
+
+// true if path points to directory with video files
+// 3 of 4 components specified: camname, date, hour | filename
+function isVideoParentPath(absLoc: string[]) {
+    return _.size(absLoc) == 3;
+}
+function toPrettyCameraPaths(absLoc: string[], listres: ListResponse) {
+    if (isVideoParentPath(absLoc)) {
+        return ({
+            ...listres,
+            items: _.map(listres.items, (v) => (
+                {...v, name: camToLocalFilename(v.name) }
+            ))
+        });
+    }
+    return listres;
+}
 
 export const CameraGridPage = observer(() => {
     const location = useLocation();

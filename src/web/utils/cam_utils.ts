@@ -31,4 +31,3 @@ export function beautify(label: string, camMeta: CamMetadataDict|undefined): str
     }
     return label;
 }
-    

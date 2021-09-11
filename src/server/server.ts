@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as express from 'express';
 import {current_config} from './config'
 import { ListResponse, ListItem, CamMetadataResponse } from '../common/models';
-import { apiError, apiWrapper, errorWrapper, sendFileHelper, sendNotFound } from './utils';
+import { apiWrapper, errorWrapper, sendFileHelper, sendNotFound } from './utils';
 import { FileInfo, findNewestFileDeep, getDirFilenames, getSubdirNames, isSafeFileName, verifySafeFileName } from './fileutils';
 import { convertFilesToMp4, convertToMp4, getVideoThumbnail, reencodeToMp4H264 } from './ffmpeg';
 import { apiFileGenWrapper } from './tmpfileproc';
@@ -11,8 +11,7 @@ import { apiFileGenWrapper } from './tmpfileproc';
 import tmp = require('tmp');
 import { readMetadataForFiles, readVideoMetadataFile } from './metadata';
 import { getDetectorThumbnailFile } from './detector_utils';
-import { logger } from '../common/logger';
-import { selectVideoSourceByClientInput, selectVideoSourceByName } from './video_source';
+import { selectVideoSourceByClientInput } from './video_source';
 const promMid = require('express-prometheus-middleware');
 
 tmp.setGracefulCleanup();
