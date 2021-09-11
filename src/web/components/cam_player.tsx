@@ -110,10 +110,11 @@ export const CamVideoPlayerComp = observer((props: CamVideoPlayerCompProps) => {
     const videoURL = ['/api/video', vformat, videoPath].join('/')
     const detectorURL = ['/api/detector/result', videoPath.replace(/[.](mp4|ts)/, '.json')].join('/');
     return (
-      <Fetch key={videoURL} url={detectorURL} children={({ data, response }) => {
-            if (response === null) {
+      <Fetch key={videoURL} url={detectorURL} children={({ data, response, failed }) => {
+            if (response === null && !failed) {
                 return <div>Loading...</div>;
             }
+            // if failed - just render with data = null
             const detectorRes: CamFileMetadata = data;
             let timelineMarkers = buildVideoMarkers(detectorRes);
             const playerProps = {
@@ -139,7 +140,7 @@ export const CamVideoPlayerPage = observer(() => {
         const parentPath = absLoc.slice(0, 3)
         const parentListFilesUrl = urljoin('/api/list/', ...parentPath, '/');
         return (
-            <Fetch url={parentListFilesUrl} children={({ failed, data }: {failed: boolean, data: ListResponse, response}) => {
+            <Fetch url={parentListFilesUrl} children={({ failed, data, response }) => {
                 if (failed) {
                     return <div>Whoops</div>;
                 }
@@ -147,7 +148,7 @@ export const CamVideoPlayerPage = observer(() => {
                     return <div>Loading...</div>;
                 } else {
                     const selHHMM = `${hour}${fn}`
-                    const selectedVideoItem = _.find(data.items, (v) => (camFilenameMatchingHHMM(v.name, selHHMM)));
+                    const selectedVideoItem = _.find((data as ListResponse).items, (v) => (camFilenameMatchingHHMM(v.name, selHHMM)));
                     if (!selectedVideoItem) {
                         return <div>Nothing to show...</div>;
                     } else {
