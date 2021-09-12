@@ -8,8 +8,8 @@ export enum CamPathLen {
     Video,
 }
 
-
-export function buildViewUrl(path: string[]) {
+// converts camPath to pretty camPath
+export function prettyPath(path: string[]) {
     let resPath = path;
     if (path.length == CamPathLen.Video) {
         const fn = _.last(path);
@@ -17,5 +17,13 @@ export function buildViewUrl(path: string[]) {
             resPath = [...path.slice(0, -1), camFilenameToMM(fn) || fn];
         }
     }
-    return _.join(['/view', ...resPath], '/') + '/';
+    return resPath;
+}
+
+export function viewUrlFromPrettyPath(ppath: string[]) {
+    return _.join(['/view', ...ppath], '/') + '/';
+}
+
+export function buildViewUrl(path: string[]) {
+    return viewUrlFromPrettyPath(prettyPath(path));
 }

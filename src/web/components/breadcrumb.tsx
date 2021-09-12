@@ -9,7 +9,7 @@ import { urljoin } from "../utils/urljoin";
 import { SettingsMenu } from "./settings_menu";
 import "./breadcrumb.css"
 import { applyCamLabelMap, beautify } from "../utils/cam_utils";
-import { buildViewUrl, CamPathLen } from "../../common/cam_paths";
+import { buildViewUrl, CamPathLen, prettyPath, viewUrlFromPrettyPath } from "../../common/cam_paths";
 import { camFilenameToMM } from "../../common/cam_filenames";
 const classNames = require("classnames")
 
@@ -19,11 +19,16 @@ interface PathInfo {
     currentPath: string[]
 }
 // replace corresponding part of path
-function buildUrl(item: PathInfo, dropdownItem: ListItem) {
+function buildPrettyPath(item: PathInfo, dropdownItem: ListItem) {
     const pos = item.absPath.length;
     const newPath = [...item.currentPath]
     newPath[pos - 1] = dropdownItem.name
-    return buildViewUrl(newPath)
+    return prettyPath(newPath)
+}
+
+function isActivePath({absPath, currentPath}: PathInfo, itemPath: string[]) {
+    const idx = absPath.length - 1;
+    return absPath[idx] == itemPath[idx];
 }
 
 export const LiveMainPath = observer(() => {
@@ -61,9 +66,16 @@ export const LivePath = observer(({item}: {item: PathInfo}) => {
                 return (
                     <div className="dropdown-menu">
                         <ul className={classNames({multicolumn:_.size(items) > 10})}>
-                        {_.map(items, (dropdownItem, idx) => (
-                            <li key={idx}><a onClick={() => history.push(buildUrl(item, dropdownItem))}>{beautify(dropdownItem.name, camMeta)}</a></li>
-                        ))}
+                        {_.map(items, (dropdownItem, idx) => {
+                            const prettyPath = buildPrettyPath(item, dropdownItem);
+                            const viewLink = viewUrlFromPrettyPath(prettyPath);
+                            const active = isActivePath(item, prettyPath);
+                            return (
+                                <li key={idx} className={classNames({ active })}>
+                                    <a onClick={() => history.push(viewLink)}>{beautify(dropdownItem.name, camMeta)}</a>
+                                </li>
+                            )
+                        })}
                         </ul>
                     </div>
                 )
