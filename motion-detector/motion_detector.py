@@ -7,6 +7,7 @@ import os
 import sys
 import argparse
 import numpy as np
+import math
 
 GREEN = (0, 255, 0)
 log = lambda msg: None
@@ -43,6 +44,7 @@ def process_input(streamSrc, args, video_writer=None):
     process_frames = 1
     motion_start_frames = []
     motion_stop_frames = []
+    play_frame_delay = None
     if args.mask:
         mask = cv2.imread(args.mask, cv2.IMREAD_GRAYSCALE)
         mask = cv2.resize(mask, base_resolution)
@@ -144,7 +146,19 @@ def process_input(streamSrc, args, video_writer=None):
                     video_writer.write(oframe)
             if args.gui:
                 cv2.imshow("Output", oframe)
-                key = cv2.waitKey(int(1000.0 / args.fps))
+                frame_delay = 1000.0 / args.fps
+                if play_frame_delay is None:
+                    play_frame_delay = frame_delay
+                key = cv2.waitKey(math.ceil(play_frame_delay))
+                if key != -1:
+                    print(f"Frame {frameIdx}")
+                if key == ord('p'): # pause / unpause
+                    play_frame_delay = frame_delay if play_frame_delay == 0 else 0
+                if key == 24: # up arrow
+                    play_frame_delay *= 2
+                if key == 25: # down arrow
+                    play_frame_delay /= 2
+
     video.release()
     if args.gui:
         cv2.destroyAllWindows()
