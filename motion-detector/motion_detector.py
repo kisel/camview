@@ -7,6 +7,7 @@ import os
 import sys
 import argparse
 import numpy as np
+import math
 
 GREEN = (0, 255, 0)
 log = lambda msg: None
@@ -36,6 +37,7 @@ def process_input(streamSrc, args, video_writer=None):
     frameIdx = 0
     height, width = 0, 0
     minArea = 0
+    maxDiffArea = 0
     move_seq_len = 0
     longest_move_seq = 0
     total_motion_frames = 0
@@ -43,6 +45,7 @@ def process_input(streamSrc, args, video_writer=None):
     process_frames = 1
     motion_start_frames = []
     motion_stop_frames = []
+    play_frame_delay = None
     if args.mask:
         mask = cv2.imread(args.mask, cv2.IMREAD_GRAYSCALE)
         mask = cv2.resize(mask, base_resolution)
@@ -87,7 +90,12 @@ def process_input(streamSrc, args, video_writer=None):
         thres_frame = cv2.dilate(thres_frame, None, iterations=2)
 
         cnts, _ = cv2.findContours(thres_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        moved_objects = [c for c in cnts if cv2.contourArea(c) > minArea]
+        moved_objects = []
+        for c in cnts:
+            area = cv2.contourArea(c)
+            if area > minArea:
+                moved_objects.append(c)
+            maxDiffArea = max(area, maxDiffArea)
         if len(moved_objects) > args.max_groups:
             too_many_objects += 1
             move_seq_len = 0
@@ -144,7 +152,19 @@ def process_input(streamSrc, args, video_writer=None):
                     video_writer.write(oframe)
             if args.gui:
                 cv2.imshow("Output", oframe)
-                key = cv2.waitKey(int(1000.0 / args.fps))
+                frame_delay = 1000.0 / args.fps
+                if play_frame_delay is None:
+                    play_frame_delay = frame_delay
+                key = cv2.waitKey(math.ceil(play_frame_delay))
+                if key != -1:
+                    print(f"Frame {frameIdx}")
+                if key == ord('p'): # pause / unpause
+                    play_frame_delay = frame_delay if play_frame_delay == 0 else 0
+                if key == 24: # up arrow
+                    play_frame_delay *= 2
+                if key == 25: # down arrow
+                    play_frame_delay /= 2
+
     video.release()
     if args.gui:
         cv2.destroyAllWindows()
@@ -157,7 +177,8 @@ def process_input(streamSrc, args, video_writer=None):
             'motion_seconds_total': total_motion_frames / fps,
             'motion_start_frames': motion_start_frames,
             'motion_stop_frames': motion_stop_frames,
-            'too_many_objects': too_many_objects
+            'too_many_objects': too_many_objects,
+            'motion_factor': width * height / max(1, maxDiffArea),
             }
 
 def g2c(g):
@@ -194,7 +215,7 @@ def main():
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
             help='update reference frame each "r" frames' )
     parser.add_argument('-f', '--factor', type=int, default=1000,
-            help='area/factor - minimal area treated as change(default=1000)' )
+            help='detector sensibility. relation full area / changed area(default=1000).' )
     parser.add_argument('--max-groups', type=int, default=10,
             help='ignore false detections of too many objects due cam reinit' )
     parser.add_argument('--threads', type=int,
