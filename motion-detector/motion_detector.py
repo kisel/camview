@@ -37,6 +37,7 @@ def process_input(streamSrc, args, video_writer=None):
     frameIdx = 0
     height, width = 0, 0
     minArea = 0
+    maxDiffArea = 0
     move_seq_len = 0
     longest_move_seq = 0
     total_motion_frames = 0
@@ -89,7 +90,12 @@ def process_input(streamSrc, args, video_writer=None):
         thres_frame = cv2.dilate(thres_frame, None, iterations=2)
 
         cnts, _ = cv2.findContours(thres_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        moved_objects = [c for c in cnts if cv2.contourArea(c) > minArea]
+        moved_objects = []
+        for c in cnts:
+            area = cv2.contourArea(c)
+            if area > minArea:
+                moved_objects.append(c)
+            maxDiffArea = max(area, maxDiffArea)
         if len(moved_objects) > args.max_groups:
             too_many_objects += 1
             move_seq_len = 0
@@ -171,7 +177,8 @@ def process_input(streamSrc, args, video_writer=None):
             'motion_seconds_total': total_motion_frames / fps,
             'motion_start_frames': motion_start_frames,
             'motion_stop_frames': motion_stop_frames,
-            'too_many_objects': too_many_objects
+            'too_many_objects': too_many_objects,
+            'motion_factor': width * height / max(1, maxDiffArea),
             }
 
 def g2c(g):
@@ -208,7 +215,7 @@ def main():
     parser.add_argument('-r', '--ref-frames', type=int, default=1,
             help='update reference frame each "r" frames' )
     parser.add_argument('-f', '--factor', type=int, default=1000,
-            help='area/factor - minimal area treated as change(default=1000)' )
+            help='detector sensibility. relation full area / changed area(default=1000).' )
     parser.add_argument('--max-groups', type=int, default=10,
             help='ignore false detections of too many objects due cam reinit' )
     parser.add_argument('--threads', type=int,
