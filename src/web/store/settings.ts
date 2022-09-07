@@ -9,8 +9,8 @@ export interface ClientSettings {
     // use legacy native browser player(no video.js)
     native_player?: boolean
 
-    // preferred daytime for day-snapshot
-    favorite_time?: number
+    // preferred daytime(2-digit) for day-snapshot
+    favorite_time?: string | undefined
 
     cam_columns?: number
     with_borders?: boolean
@@ -19,7 +19,7 @@ export interface ClientSettings {
 }
 
 export const defaultSettings: ClientSettings = {
-    favorite_time: 15,
+    favorite_time: undefined,
     cam_columns: 6,
 }
 

@@ -59,7 +59,7 @@ const DropdownSetting = observer(({name, label, choices}: DropdownSettingProps) 
             <label htmlFor={hid} className="form-label">{name}</label>
             <select className="form-select form-select-sm"  onChange={(e)=> theSettingsStore.configure({[name]: e.target.value})} value={`${val}`}>
                 {choices.map((c)=>(
-                    <option key={c}>{c}</option>
+                    <option key={`${c}`}>{c}</option>
                 ))}
             </select>
         </div>
@@ -74,7 +74,7 @@ export const SettingsPage = observer(() => {
             <BoolSetting label="Show all video" name="show_all_video"/>
             <BoolSetting label="Native player" name="native_player"/>
             <DropdownSetting label="Cam columns" name="cam_columns" choices={[2, 3, 4, 6, 12]}/>
-            <DropdownSetting label="Favorite time" name="favorite_time" choices={[0, 12, 15, 18, 22]}/>
+            <DropdownSetting label="Favorite time" name="favorite_time" choices={[undefined, '00', '07', '08', '09', '12', '15', '17', '19', '22', '23']}/>
         </form>
     );
 });
