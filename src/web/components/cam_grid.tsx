@@ -40,7 +40,7 @@ export const CameraGrid = observer(({currentPath, currentPathInfo}: CameraGridPr
         const playerURL = urljoin(buildViewUrl(newPath), motionStart ? `/?time=${motionStart}`: '/');
         const imgQueryOpts = queryOptions(
             'resolution=thumbnail',
-            favorite_time !== undefined && `def_hour=${favorite_time}`,
+            (favorite_time !== undefined && currentPath.length != 0) && `def_hour=${favorite_time}`,
             hasMotion && 'detector=1',
         )
         return (
